@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>点歌台 · 大屏</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--txt:#f2f6ff;--sub:#9fb0d0;--accent:#2ee0b6;--gold:#ffe27a}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#070a14;color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+#bg{position:fixed;inset:0;z-index:0;background:radial-gradient(900px 600px at 18% 18%,#3a2b6b,transparent 70%),radial-gradient(800px 620px at 82% 76%,#0d4a53,transparent 70%),linear-gradient(135deg,#080b18,#12172b)}
+#coverbg{position:fixed;inset:-6%;z-index:0;pointer-events:none;background-size:cover;background-position:center;opacity:0;filter:blur(54px) saturate(1.35);transition:opacity .9s}
+#coverbg.on{opacity:.30}
+#glow{position:fixed;inset:0;z-index:0;opacity:.5;background:radial-gradient(420px 420px at 30% 40%,rgba(88,80,200,.28),transparent 70%),radial-gradient(360px 360px at 72% 62%,rgba(20,190,165,.22),transparent 70%);animation:drift 18s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate(-4%,-3%) scale(1)}to{transform:translate(5%,4%) scale(1.15)}}
+#v{position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:transparent;z-index:1;display:none}
+#fx{position:fixed;inset:0;z-index:2;pointer-events:none}
+#stage{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;padding:20px 32px 18px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;font-size:14px;color:var(--sub)}
+.brandbox{display:flex;align-items:center;gap:14px}
+#cover{width:clamp(48px,5vw,88px);height:clamp(48px,5vw,88px);border-radius:50%;object-fit:cover;flex:none;display:none;border:2px solid rgba(255,255,255,.22);box-shadow:0 8px 34px rgba(0,0,0,.48);animation:spin 16s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brand b{color:var(--accent);font-weight:600}
+.brand span{opacity:.7}
+.qrcard{display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;border-radius:16px;background:rgba(14,20,38,.66);border:1px solid rgba(255,255,255,.12)}
+#qrimg{width:96px;height:96px;background:#fff;border-radius:8px;overflow:hidden;flex:none;display:flex;align-items:center;justify-content:center}
+#qrimg img{width:100%;height:100%;display:block}
+.qrtxt{line-height:1.7;font-size:13px;max-width:230px}
+.qrtxt b{display:block;color:var(--txt);font-size:15px}
+.qrtxt code{color:var(--accent);font-size:13px;word-break:break-all}
+.qrtxt small{color:var(--sub);font-size:11px}
+/* 无卡片、无边框、无毛玻璃：内容直接浮在粒子层之上 */
+.card{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;width:100%;max-width:none;margin:0;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;text-shadow:0 3px 26px rgba(0,0,0,.62),0 1px 5px rgba(0,0,0,.5)}
+#pos{font-size:12px;letter-spacing:2px;color:var(--sub);margin-bottom:10px}
+#title{font-size:clamp(26px,4.4vw,58px);font-weight:700;letter-spacing:1px;line-height:1.25;margin:0 0 8px}
+#artist{font-size:clamp(13px,1.5vw,20px);color:var(--sub);margin-bottom:24px;min-height:1.4em}
+#lyric{width:100%;font-size:clamp(20px,3.1vw,44px);font-weight:600;line-height:1.55;min-height:4.4em;display:flex;flex-direction:column;justify-content:center;gap:10px}
+#l0,#l2{font-size:.5em;color:var(--sub);opacity:.62;min-height:1.2em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#l1{min-height:1.55em;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0}
+#l1 .ch{color:rgba(238,246,255,.42);text-shadow:0 2px 18px rgba(0,0,0,.6);transition:color .1s linear,text-shadow .1s linear}
+#l1 .ch.on{color:var(--gold);text-shadow:0 0 22px rgba(255,196,74,.8)}
+#l1 .ch.now{color:#fff;text-shadow:0 0 26px rgba(46,224,182,.95)}
+/* 播放态：歌名缩为角标，歌词区铺满整屏中间区域 */
+body.playing #pos{display:none}
+body.playing #title{font-size:clamp(15px,1.7vw,26px);font-weight:600;opacity:.82;margin:0 0 2px}
+body.playing #artist{font-size:clamp(11px,1.1vw,16px);min-height:0;margin:0 0 6px;opacity:.7}
+body.playing #lyric{flex:1;min-height:0;font-size:clamp(30px,5.4vw,96px);line-height:1.32;gap:clamp(4px,1.2vh,18px);justify-content:center}
+body.playing #l0,body.playing #l2{font-size:.36em;opacity:.5;min-height:1.1em}
+body.playing #l1{min-height:0;flex:0 0 auto}
+.bot{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--sub);flex-wrap:wrap}
+#time{white-space:nowrap;font-variant-numeric:tabular-nums;min-width:100px}
+#seek{flex:1;min-width:140px;height:8px;border-radius:8px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,var(--accent) 0%,var(--accent) var(--p,0%),rgba(255,255,255,.18) var(--p,0%),rgba(255,255,255,.18) 100%)}
+#seek::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(46,224,182,.3);cursor:pointer}
+#seek::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(46,224,182,.3);cursor:pointer}
+#count{white-space:nowrap}
+#next{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:24vw}
+.btns{display:flex;gap:8px;margin-left:auto}
+button{font-family:inherit}
+.bot button,.phead button,.pbar button,.pop,.lanrow button{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:var(--txt);border-radius:10px;padding:9px 14px;font-size:13px;cursor:pointer;white-space:nowrap}
+.bot button.pri,.pbar button.pri{background:var(--accent);color:#06251f;border:0;font-weight:700}
+button:focus,input:focus,a:focus{outline:3px solid var(--gold);outline-offset:3px}
+.keys{margin-top:9px;font-size:11px;color:var(--sub);opacity:.72;text-align:center}
+#overlay{position:fixed;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;background:rgba(7,10,20,.9);backdrop-filter:blur(10px);cursor:pointer}
+#overlay div{text-align:center}
+#overlay h2{font-size:30px;margin:0 0 14px}
+#overlay p{color:var(--sub);font-size:15px;line-height:2;margin:0 0 28px}
+#overlay button{font-size:18px;padding:15px 46px;border:0;border-radius:14px;background:var(--accent);color:#06251f;font-weight:700;cursor:pointer}
+#picker{position:fixed;inset:0;z-index:10;display:none;flex-direction:column;padding:20px clamp(14px,4vw,60px);background:rgba(8,12,24,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.phead{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.phead h2{font-size:22px;margin:0 8px 0 0}
+.ptabs{display:flex;gap:8px;flex:1;flex-wrap:wrap}
+.ptabs button{padding:9px 18px;font-size:14px;border:0;border-radius:9px;background:rgba(255,255,255,.09);color:var(--sub);cursor:pointer;font-family:inherit}
+.ptabs button.on{background:var(--accent);color:#06251f;font-weight:700}
+#pq{width:100%;max-width:520px;margin:14px 0 0;padding:11px 14px;font-size:16px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(20,27,48,.9);color:var(--txt);outline:none}
+#plist{flex:1;overflow:auto;margin:14px 0;padding-right:6px}
+.prow{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.08)}
+.prow img.cov{width:38px;height:38px;border-radius:8px;object-fit:cover;flex:none;background:rgba(255,255,255,.06)}
+.pmain{flex:1;text-align:left;font-size:15px;padding:11px 14px;border:0;border-radius:9px;background:rgba(255,255,255,.055);color:var(--txt);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pmain.cur{color:var(--accent);font-weight:700;background:rgba(46,224,182,.12)}
+.pmain .num{display:inline-block;min-width:2.2em;color:var(--sub);font-variant-numeric:tabular-nums}
+.tag{font-size:11px;color:var(--accent);border:1px solid rgba(46,224,182,.4);border-radius:5px;padding:3px 6px;flex:none}
+.pop{background:rgba(232,81,122,.18);border-color:rgba(232,81,122,.4);color:#ffd8e3}
+.pbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tip{padding:34px 4px;text-align:center;color:var(--sub);font-size:14px;line-height:1.9}
+.pfoot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--sub);border-top:1px solid rgba(255,255,255,.1);padding-top:12px}
+.lanrow{display:flex;align-items:center;gap:8px;margin-left:auto}
+.lanrow input{width:min(260px,42vw);padding:8px 10px;font-size:12px;border-radius:8px;border:1px solid rgba(255,255,255,.16);background:rgba(20,27,48,.9);color:var(--txt);outline:none}
+.plinks{display:flex;gap:8px;flex-wrap:wrap}
+.plinks a{text-decoration:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:var(--txt);border-radius:10px;padding:9px 14px;font-size:13px;white-space:nowrap}
+#toast{position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:14;padding:12px 24px;border-radius:12px;background:rgba(46,224,182,.94);color:#05251f;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .22s;max-width:80vw;text-align:center}
+#toast.show{opacity:1}
+/* ---------- 手机窄屏：二维码收成小胶囊，底部按钮改网格，杜绝横向溢出 ---------- */
+@media (max-width:720px){
+  #stage{padding:10px 12px 12px}
+  .top{gap:8px;align-items:flex-start}
+  .brandbox{gap:8px}
+  .brand{font-size:12px;white-space:nowrap}
+  .brand span{display:none}
+  #cover{width:34px;height:34px}
+  .qrcard{flex:none;flex-direction:column;gap:3px;padding:5px 6px;border-radius:11px}
+  #qrimg{width:64px;height:64px;border-radius:5px}
+  .qrtxt{max-width:none;text-align:center;line-height:1.2;font-size:9px}
+  .qrtxt b{font-size:9px;font-weight:600;white-space:nowrap}
+  .qrtxt code,.qrtxt small{display:none}
+  .card{padding:0 2px}
+  #title{font-size:clamp(22px,6vw,30px)}
+  #artist{font-size:12px;margin-bottom:12px}
+  #lyric{font-size:clamp(18px,5.4vw,26px);min-height:3.6em}
+  body.playing #lyric{font-size:clamp(22px,7vw,34px)}
+  body.playing #title{font-size:15px}
+  body.playing #artist{font-size:11px}
+  .bot{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:7px 10px;font-size:11px}
+  #time,#count{min-width:0;font-size:11px}
+  #next{display:none}
+  #seek{grid-column:1/-1;grid-row:2;width:100%;min-width:0;height:6px;margin:0}
+  .btns{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:0}
+  .btns button{grid-column:span 2}
+  .btns button:nth-child(4),.btns button:nth-child(5){grid-column:span 3}
+  .bot button{padding:8px 3px;font-size:11px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .keys{display:none}
+  #toast{top:auto;bottom:15%;font-size:12px;padding:9px 14px;max-width:86vw}
+  #overlay h2{font-size:22px}
+  #overlay p{font-size:13px}
+  #overlay button{font-size:16px;padding:12px 28px}
+  #picker{padding:12px}
+  .phead{gap:8px}
+  .phead h2{font-size:18px;margin:0}
+  .phead>button{padding:8px 10px;font-size:12px}
+  .ptabs{order:2;flex:1 1 100%;gap:6px}
+  .ptabs button{flex:1;padding:8px 3px;font-size:12px}
+  #pq{margin-top:10px;font-size:16px}
+  .pfoot{flex-direction:column;align-items:stretch;gap:8px}
+  .lanrow{margin-left:0;width:100%}
+  .lanrow input{flex:1;width:auto;min-width:0}
+}
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="glow"></div><div id="coverbg"></div>
+<video id="v" playsinline></video>
+<audio id="a"></audio>
+<canvas id="fx"></canvas>
+<div id="stage">
+  <div class="top">
+    <div class="brandbox"><img id="cover" alt=""><div class="brand">&#127908; <b>点歌台</b> <span>· 大屏播放端</span></div></div>
+    <div class="qrcard">
+      <div id="qrimg"></div>
+      <div class="qrtxt"><b>手机扫码点歌</b><code id="addr">—</code><br><small>扫码即可点歌 / 看队列 / 切歌 / 删除</small></div>
+    </div>
+  </div>
+  <div class="card">
+    <div id="pos">排队中</div>
+    <h1 id="title">等待点歌</h1>
+    <div id="artist">在手机上打开点歌台，或按 OK / S 键直接点歌</div>
+    <div id="lyric"><div id="l0"></div><div id="l1">&#9835;</div><div id="l2"></div></div>
+  </div>
+  <div class="bot">
+    <span id="time">0:00 / --:--</span>
+    <input id="seek" type="range" min="0" max="1000" value="0" aria-label="播放进度，可拖动">
+    <span id="count">已点 0 首</span>
+    <span id="next"></span>
+    <div class="btns">
+      <button id="bPrev" onclick="api('/api/prev')">&#9198; 上一首</button>
+      <button id="bToggle" onclick="toggle()">&#9199; 播放/暂停</button>
+      <button id="bNext" onclick="api('/api/next')">&#9197; 切歌</button>
+      <button id="bTrack" onclick="switchTrack()">&#127908; 切伴奏</button>
+      <button id="bPick" class="pri" onclick="openPicker()">&#127908; 点歌</button>
+    </div>
+  </div>
+  <div class="keys">遥控器：方向键选择 · OK 确认 · 返回键关闭　|　键盘：S 搜歌 · Q 队列 · N 切歌 · P 上一首 · T 原唱/伴奏 · 空格 播放暂停 · &#8592;/&#8594; 快进退 5 秒 · 1~9 快捷点歌</div>
+</div>
+<div id="picker">
+  <div class="phead">
+    <h2>&#127908; 点歌</h2>
+    <div class="ptabs">
+      <button id="th" onclick="setPTab('hot')">热歌榜</button>
+      <button id="ts" onclick="setPTab('search')">搜歌</button>
+      <button id="tl" onclick="setPTab('local')">本地曲库</button>
+      <button id="tq" onclick="setPTab('queue')">已点队列</button>
+    </div>
+    <button onclick="closePicker()">关闭 &#10005;</button>
+  </div>
+  <input id="pq" placeholder="输入歌名 / 歌手 / 拼音（如 zjl、zhoujielun），回车搜索" autocomplete="off">
+  <div id="plist"></div>
+  <div class="pfoot">
+    <span>方向键选择 · OK/Enter 确认 · 返回键关闭 · 数字键 1~9 点第 N 首 · 支持拼音搜歌</span>
+    <div class="plinks"><a href="/files" target="_blank">&#128193; 曲库文件夹</a><a href="/about" target="_blank">关于 / 升级</a></div>
+    <div class="lanrow"><span>点歌地址</span><input id="lanInput" placeholder="http://IP:18089/"><button onclick="applyLan()">应用并换码</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="overlay"><div>
+  <h2>开启大屏播放</h2>
+  <p>浏览器需要一次点击才允许自动播放<br>点击后本页会跟随点歌队列自动切歌</p>
+  <button>点击进入</button>
+</div></div>
+<script>
+var el=function(i){return document.getElementById(i)};
+var a=el('a'),v=el('v'),cvs=el('fx'),ctx=cvs.getContext('2d');
+var curSeq=-1,lrc=[],started=false,seeking=false,useVideo=false,songDur=0;
+var lyricKey='',spans=[],units=[],pOpen=false,ptab='hot',lastSongs=[],ptm=null,toastTm=null;
+var W=0,H=0,dpr=1,parts=[],lastFrame=0,addrs='',curTrack='orig';
+
+function get(u,cb){var x=new XMLHttpRequest();x.open('GET',u,true);
+ x.onreadystatechange=function(){if(x.readyState===4)cb(x.status===200?x.responseText:null)};
+ x.onerror=function(){cb(null)};x.send()}
+function toast(m){var t=el('toast');t.textContent=m;t.className='show';clearTimeout(toastTm);toastTm=setTimeout(function(){t.className=''},2200)}
+function fmt(s){s=Math.max(0,Math.floor(s||0));return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
+function media(){return useVideo?v:a}
+function play(m){if(actx&&actx.state==='suspended'){try{actx.resume()}catch(e){}}
+ var p=m.play();if(p&&p.catch)p.catch(function(){})}
+
+/* ---------- 原唱 / 伴奏：立体声消人声（同源音源，本地与在线都可用） ---------- */
+var actx=null,waDry=null,waWet=null,waOk=true,curKaraoke=false,curPlay='';
+function initAudio(){
+ if(actx||!waOk)return;
+ var AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC){waOk=false;return}
+ try{
+  var c=new AC(),ing=c.createGain(),dry=c.createGain(),wet=c.createGain(),
+      spl=c.createChannelSplitter(2),inv=c.createGain(),diff=c.createGain(),
+      lp=c.createBiquadFilter(),low=c.createGain(),mrg=c.createChannelMerger(2);
+  inv.gain.value=-1;diff.gain.value=.5;      /* L + (-R) = 中央人声被抵消 */
+  lp.type='lowpass';lp.frequency.value=180;  /* 补回中央低频：鼓 / 贝斯 */
+  low.gain.value=.85;dry.gain.value=1;wet.gain.value=0;
+  ing.connect(dry);dry.connect(c.destination);
+  ing.connect(spl);spl.connect(diff,0);spl.connect(inv,1);inv.connect(diff);
+  diff.connect(wet);
+  ing.connect(lp);lp.connect(low);low.connect(wet);
+  wet.connect(mrg,0,0);wet.connect(mrg,0,1);mrg.connect(c.destination);
+  try{c.createMediaElementSource(a).connect(ing)}catch(e){}
+  try{c.createMediaElementSource(v).connect(ing)}catch(e){}
+  actx=c;waDry=dry;waWet=wet;
+  if(c.state==='suspended')c.resume();
+  setKaraoke(curKaraoke);          /* 页面加载时已是伴奏态也要生效 */
+ }catch(e){waOk=false;actx=null}
+}
+function setKaraoke(on){
+ curKaraoke=!!on;
+ if(!actx||!waDry||!waWet)return;
+ try{
+  var t=actx.currentTime;
+  waDry.gain.cancelScheduledValues(t);waWet.gain.cancelScheduledValues(t);
+  waDry.gain.setTargetAtTime(on?0:1,t,.02);
+  waWet.gain.setTargetAtTime(on?1:0,t,.02);
+  if(actx.state==='suspended')actx.resume();
+ }catch(e){}
+}
+
+/* ---------- 粒子层：canvas 始终透明绘制，绝不铺黑底 ---------- */
+function resize(){dpr=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;
+ cvs.width=Math.round(W*dpr);cvs.height=Math.round(H*dpr);cvs.style.width=W+'px';cvs.style.height=H+'px';
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ var n=Math.max(34,Math.min(88,Math.round(W*H/22000)));parts=[];
+ for(var i=0;i<n;i++)parts.push({x:Math.random()*W,y:Math.random()*H,
+  vx:(Math.random()-.5)*.30,vy:(Math.random()-.5)*.30,r:1+Math.random()*2.4,
+  h:[168,190,265,330][i%4],al:.24+Math.random()*.5})}
+function draw(){if(!W||!H)return;
+ ctx.clearRect(0,0,W,H);
+ var t=Date.now()/1000,pulse=.5+.5*Math.sin(t*1.1);
+ var g=ctx.createRadialGradient(W*.5,H*.54,10,W*.5,H*.54,Math.max(W,H)*.72);
+ g.addColorStop(0,'rgba(80,120,215,'+(.09+.05*pulse).toFixed(3)+')');g.addColorStop(1,'rgba(0,0,0,0)');
+ ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ var i,j,p,q,dx,dy,d;
+ for(i=0;i<parts.length;i++){p=parts[i];p.x+=p.vx*(1+pulse*.5);p.y+=p.vy*(1+pulse*.5);
+  if(p.x<-10)p.x=W+10;if(p.x>W+10)p.x=-10;if(p.y<-10)p.y=H+10;if(p.y>H+10)p.y=-10;
+  ctx.beginPath();ctx.arc(p.x,p.y,p.r+pulse*.5,0,6.2832);
+  ctx.fillStyle='hsla('+p.h+',85%,72%,'+p.al.toFixed(3)+')';ctx.fill()}
+ ctx.lineWidth=.6;
+ for(i=0;i<parts.length;i++)for(j=i+1;j<parts.length;j++){p=parts[i];q=parts[j];
+  dx=p.x-q.x;dy=p.y-q.y;d=dx*dx+dy*dy;
+  if(d<15000){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+   ctx.strokeStyle='rgba(130,190,240,'+(.10*(1-d/15000)).toFixed(3)+')';ctx.stroke()}}
+ lastFrame=Date.now()}
+function loop(){draw();if(window.requestAnimationFrame)requestAnimationFrame(loop)}
+if(window.requestAnimationFrame)requestAnimationFrame(loop);
+setInterval(function(){if(Date.now()-lastFrame>1200)draw()},120);
+window.onresize=resize;
+document.addEventListener('visibilitychange',function(){lastFrame=0;draw()});
+resize();
+
+/* ---------- 歌词：普通 LRC 渐进染色 + 逐字时间戳精确染色 ---------- */
+function toSec(s){var m=/^(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?$/.exec(s);
+ return m?(+m[1])*60+(+m[2])+(+('0.'+(m[3]||'0'))):null}
+function splitChars(t){return t.match(/[\u3400-\u9fff\u3000-\u303f]|[A-Za-z0-9'’]+|[^\s]/g)||[t]}
+function parseLrc(txt){var out=[];
+ (txt||'').split(/\r?\n/).forEach(function(line){
+  var tagRe=/\[(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g,m,times=[],last=0;
+  while((m=tagRe.exec(line))!==null){var s=toSec(m[1]+':'+m[2]+'.'+(m[3]||'0'));
+   if(s!==null){times.push(s);last=tagRe.lastIndex}}
+  if(!times.length)return;
+  var body=line.slice(last),chars=null,text='';
+  if(/<\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?>/.test(body)){
+   var wRe=/<(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?>/g,wm,tags=[];
+   while((wm=wRe.exec(body))!==null)tags.push(toSec(wm[1]+':'+wm[2]+'.'+(wm[3]||'0')));
+   var parts2=body.split(/<\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?>/);chars=[];
+   var front=parts2[0].replace(/\s/g,'')==='';
+   for(var i=0;i<parts2.length;i++){
+    var c=parts2[i];if(!c||(front&&i===0))continue;
+    var tt=front?tags[i-1]:(i===0?times[0]:tags[i-1]);
+    chars.push({c:c,t:(tt===undefined||tt===null)?times[0]:tt})}
+   for(var k=0;k<chars.length;k++)text+=chars[k].c
+  }else{text=body.trim()}
+  if(!text.trim())return;
+  for(var n=0;n<times.length;n++)out.push({t:times[n],end:0,text:text,chars:chars})
+ });
+ out.sort(function(x,y){return x.t-y.t});
+ for(var z=0;z<out.length;z++)out[z].end=(z+1<out.length?out[z+1].t:out[z].t+6);
+ return out}
+function renderKara(idx,t){var line=lrc[idx],key=idx+'|'+line.text;
+ if(key!==lyricKey){lyricKey=key;var box=el('l1');box.innerHTML='';spans=[];
+  units=line.chars||splitChars(line.text).map(function(c){return{c:c}});
+  for(var i=0;i<units.length;i++){var s=document.createElement('span');s.className='ch';
+   s.textContent=units[i].c;box.appendChild(s);spans.push(s)}}
+ var sung=0;
+ if(line.chars){for(var j=0;j<line.chars.length;j++)if(t>=line.chars[j].t)sung=j+1}
+ else{var span=Math.max(.4,Math.min(14,line.end-line.t));
+  sung=Math.round(Math.max(0,Math.min(1,(t-line.t)/span))*spans.length)}
+ for(var q=0;q<spans.length;q++){var cl=q<sung?'ch on':(q===sung?'ch now':'ch');
+  if(spans[q].className!==cl)spans[q].className=cl}}
+function showLyric(t){
+ if(!lrc.length){if(lyricKey!=='empty'){lyricKey='empty';el('l0').textContent='';el('l2').textContent='';
+  el('l1').textContent='\u266b';spans=[]}return}
+ var i=0;for(var k=0;k<lrc.length;k++)if(lrc[k].t<=t)i=k;
+ el('l0').textContent=i>0?lrc[i-1].text:'';
+ el('l2').textContent=i+1<lrc.length?lrc[i+1].text:'';
+ renderKara(i,t)}
+
+/* ---------- 进度条：鼠标 / 触摸 / 遥控器 / 键盘均可拖动 ---------- */
+var seek=el('seek');
+function paint(){var m=media();if(!m)return;var d=m.duration,t=m.currentTime||0;
+ if(isFinite(d)&&d>0){songDur=d;var pct=seeking?(+seek.value/10):(t/d*100);
+  el('time').textContent=(seeking?fmt(d*(+seek.value/1000)):fmt(t))+' / '+fmt(d);
+  seek.style.setProperty('--p',pct.toFixed(2)+'%');
+  if(!seeking)seek.value=Math.round(t/d*1000)}
+ else{el('time').textContent=fmt(t)+' / --:--'}
+ showLyric(t)}
+function applySeek(){if(!seeking)return;var m=media();if(!m){seeking=false;return}
+ if(isFinite(m.duration)&&m.duration>0){m.currentTime=m.duration*(+seek.value/1000);play(m)}
+ seeking=false;paint()}
+seek.addEventListener('mousedown',function(){seeking=true});
+seek.addEventListener('touchstart',function(){seeking=true},{passive:true});
+if(window.PointerEvent)seek.addEventListener('pointerdown',function(){seeking=true});
+seek.addEventListener('input',function(){seeking=true;paint()});
+seek.addEventListener('change',applySeek);
+seek.addEventListener('mouseup',applySeek);
+seek.addEventListener('touchend',applySeek);
+seek.addEventListener('blur',function(){if(seeking)applySeek()});
+function nudge(sec){var m=media();if(!m||!isFinite(m.duration)||m.duration<=0)return;
+ m.currentTime=Math.max(0,Math.min(m.duration,m.currentTime+sec));paint();
+ toast(sec>0?'快进 5 秒':'快退 5 秒')}
+
+/* ---------- 播放控制 ---------- */
+function meta(d){curTrack=d.track||'orig';
+ el('bTrack').textContent=curTrack==='orig'?'\u266A 切伴奏':'\u266A 切回原唱';
+ el('bTrack').title=d.karaoke?'当前：消人声伴奏（放「歌名-伴奏.mp3」进曲库可用真伴奏）':'当前：原唱';
+ el('count').textContent='已点 '+d.n+' 首';
+ el('next').textContent=d.next?('下一首：'+d.next):'';
+ el('pos').textContent=d.cur_i>=0?('第 '+(d.cur_i+1)+' / '+d.n+' 首'):'排队中'}
+function loadSong(d){var same=(el('title').textContent===d.cur),oldT=0;
+ try{oldT=media().currentTime||0}catch(e){}
+ curSeq=d.seq;curPlay=d.play;curKaraoke=!!d.karaoke;
+ lrc=[];lyricKey='';spans=[];useVideo=!!d.video;songDur=0;
+ document.body.classList.add('playing');
+ setCover(d.cover);
+ el('title').textContent=d.cur;meta(d);
+ el('l0').textContent='';el('l1').textContent='\u266b';el('l2').textContent='';
+ el('artist').textContent=d.next?('接下来：'+d.next):'尽情欢唱';
+ seek.value=0;seek.style.setProperty('--p','0%');
+ el('v').style.display='none';
+ if(useVideo){a.pause();a.removeAttribute('src');try{a.load()}catch(e){}
+  v.src=d.play;try{v.load()}catch(e){}play(v)}
+ else{v.pause();v.removeAttribute('src');try{v.load()}catch(e){}
+  a.src=d.play;try{a.load()}catch(e){}play(a)}
+ setKaraoke(curKaraoke);
+ if(same&&oldT>1){var mm=media(),onm=function(){try{mm.currentTime=oldT}catch(e){}
+  mm.removeEventListener('loadedmetadata',onm)};mm.addEventListener('loadedmetadata',onm)}
+ if(d.lrc)get(d.lrc,function(x){if(x)lrc=parseLrc(x)})}
+function switchTrack(){var mode=curTrack==='orig'?'inst':'orig';
+ toast(mode==='inst'?'正在切换伴奏…':'正在切回原唱…');
+ get('/api/track?mode='+mode,function(x){if(x===null){toast('切换失败');return}
+  toast(x==='ok'||x==='already'?(mode==='inst'?'已切到伴奏':'已切回原唱'):x);poll()})}
+function setCover(u){var im=el('cover'),bg=el('coverbg');
+ if(u){im.src=u;im.style.display='block';bg.style.backgroundImage='url("'+u+'")';bg.className='on'}
+ else{im.removeAttribute('src');im.style.display='none';bg.style.backgroundImage='';bg.className=''}}
+function stopAll(){if(a)a.pause();if(v)v.pause();el('v').style.display='none';
+ curPlay='';setKaraoke(false);
+ document.body.classList.remove('playing');setCover('');
+ el('title').textContent='等待点歌';el('artist').textContent='在手机上打开点歌台，或按 OK / S 键直接点歌';
+ el('l1').textContent='\u266b';el('l0').textContent='';el('l2').textContent='';lrc=[];lyricKey=''}
+function poll(){get('/api/now',function(x){if(!x)return;var d;try{d=JSON.parse(x)}catch(e){return}
+ if(!d.play){if(curSeq!==-2){curSeq=-2;stopAll();meta(d)}return}
+ if(d.seq!==curSeq){
+  /* 仅切原唱/伴奏且音源未变：不重载音频，进度与歌词都不断 */
+  if(d.play===curPlay&&el('title').textContent===d.cur&&!!d.karaoke!==curKaraoke){
+   curSeq=d.seq;setKaraoke(!!d.karaoke);meta(d);return}
+  loadSong(d);
+ }else meta(d)})}
+function ended(){if(curSeq<0)return;get('/api/ended?seq='+curSeq,function(){setTimeout(poll,450)})}
+a.addEventListener('ended',ended);v.addEventListener('ended',ended);
+[a,v].forEach(function(m){if(!m)return;m.addEventListener('timeupdate',paint);
+ m.addEventListener('error',function(){if(useVideo&&m===v)el('v').style.display='none'})});
+v.addEventListener('loadeddata',function(){if(useVideo)el('v').style.display='block'});
+v.addEventListener('playing',function(){if(useVideo)el('v').style.display='block'});
+v.addEventListener('emptied',function(){el('v').style.display='none'});
+function toggle(){var m=media();if(!m||!m.src){toast('暂无可播放的歌曲');return}
+ var was=m.paused;if(was){play(m)}else{m.pause()}toast(was?'继续播放':'已暂停')}
+function api(u){get(u,function(x){if(x===null){toast('操作失败');return}
+ if(u.indexOf('/api/add')===0)toast(x);
+ if(pOpen&&ptab==='queue')loadP();poll()})}
+function unlock(){if(started)return;started=true;el('overlay').style.display='none';
+ initAudio();try{play(a);a.pause()}catch(e){}poll();draw()}
+el('overlay').onclick=unlock;
+document.body.addEventListener('click',function(e){if(!started)return;
+ var t=e.target.tagName;if(t==='BUTTON'||t==='INPUT'||t==='A')return;
+ var m=media();if(m&&m.paused&&m.src)play(m)});
+
+/* ---------- 点歌面板（遥控器 / 鼠标 / USB 键盘） ---------- */
+function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;
+ if(txt!==undefined)e.textContent=txt;return e}
+function renderP(d){var L=el('plist');L.innerHTML='';lastSongs=d;
+ if(ptab==='queue'){var bar=mk('div','pbar');
+  var b1=mk('button','pri','\u23ed 切歌');b1.onclick=function(){api('/api/next')};bar.appendChild(b1);
+  var b2=mk('button','','\u23ee 上一首');b2.onclick=function(){api('/api/prev')};bar.appendChild(b2);
+  var b3=mk('button','','清空队列');b3.onclick=function(){api('/api/clear')};bar.appendChild(b3);
+  L.appendChild(bar)}
+ if(!d.length){L.appendChild(mk('div','tip',ptab==='queue'?'还没点歌，去「热歌榜」挑一首吧':'没有找到歌曲'));return}
+ for(var i=0;i<d.length;i++){(function(s,i){
+  var row=mk('div','prow');
+  if(s.cover){var ci=mk('img','cov');ci.src=s.cover;ci.alt='';ci.loading='lazy';row.appendChild(ci)}
+  var label=(i+1)+'.  '+(s.t||'')+(s.cur?'  \u25b6 正在播放':'');
+  var main=mk('button','pmain'+(s.cur?' cur':''),label);
+  if(ptab==='queue')main.onclick=function(){api('/api/jump?i='+s.i)};
+  else main.onclick=function(){api(addUrl(s))};
+  row.appendChild(main);
+  if(ptab==='queue'){var x=mk('button','pop','删除');x.onclick=function(){api('/api/del?i='+s.i)};row.appendChild(x)}
+  else row.appendChild(mk('span','tag',s.g==='local'?'本地':'在线'));
+  L.appendChild(row)})(d[i],i)}}
+function addUrl(s){return s.g==='local'?'/api/add?k='+encodeURIComponent(s.k):
+ '/api/add?id='+encodeURIComponent(s.id)+'&n='+encodeURIComponent(s.n||'')+'&a='+encodeURIComponent(s.a||'')}
+function loadP(){var u=ptab==='hot'?'/api/hot':ptab==='local'?'/api/local':
+ ptab==='queue'?'/api/queue':'/api/search?q='+encodeURIComponent(el('pq').value.trim());
+ el('pq').style.display=(ptab==='search'?'block':'none');
+ if(ptab==='search'&&!el('pq').value.trim()){renderP([]);return}
+ el('plist').innerHTML='<div class="tip">加载中…</div>';
+ get(u,function(x){if(!x){el('plist').innerHTML='<div class="tip">加载失败，请检查网络</div>';return}
+  try{renderP(JSON.parse(x))}catch(e){el('plist').innerHTML='<div class="tip">加载失败</div>'}})}
+function setPTab(t){ptab=t;var ids={hot:'th',search:'ts',local:'tl',queue:'tq'};
+ for(var k in ids)el(ids[k]).className=(k===t?'on':'');loadP()}
+function openPicker(){pOpen=true;el('picker').style.display='flex';setPTab(ptab);
+ setTimeout(function(){var b=el('th');if(b)b.focus()},60)}
+function closePicker(){pOpen=false;el('picker').style.display='none';el('bPick').focus()}
+el('pq').addEventListener('input',function(){clearTimeout(ptm);ptm=setTimeout(loadP,420)});
+function hotKey(n){if(!pOpen||ptab==='queue'||n<1||n>lastSongs.length)return;
+ toast('点歌：'+lastSongs[n-1].t);api(addUrl(lastSongs[n-1]))}
+
+/* ---------- 手机扫码：地址与二维码 ---------- */
+function normUrl(u){u=(u||'').trim();if(!/^https?:\/\//.test(u))u='http://'+u;
+ if(u.slice(-1)!=='/')u+='/';
+ if(u.length>190||!/^https?:\/\/[\x21-\x7e]+$/.test(u)){toast('地址不合法');return null}
+ return u}
+function applyAddr(u){addrs=u;el('addr').textContent=u.replace(/^https?:\/\//,'').replace(/\/$/,'');
+ el('qrimg').innerHTML='<img alt="点歌二维码" src="/qr.svg?u='+encodeURIComponent(u)+'">';
+ el('lanInput').value=u;
+ if(/localhost|127\.0\.0\.1|\[::1\]/.test(u))toast('请填局域网 IP，手机才能扫码')}
+function initAddr(){var saved='';try{saved=localStorage.getItem('ktv_lan')||''}catch(e){}
+ if(saved){applyAddr(normUrl(saved)||location.origin+'/');return}
+ get('/api/lan',function(x){var d={};try{d=JSON.parse(x||'{}')}catch(e){}
+  var u=location.origin+'/';
+  if(/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)&&d.lan)u=d.lan;
+  applyAddr(normUrl(u)||(location.protocol+'//'+location.host+'/'))})}
+function applyLan(){var u=normUrl(el('lanInput').value);if(!u)return;
+ try{localStorage.setItem('ktv_lan',u)}catch(e){}applyAddr(u);toast('二维码已更新')}
+
+/* ---------- 遥控器 / 键盘焦点导航 ---------- */
+function focusList(){var root=pOpen?el('picker'):el('stage'),
+ arr=root.querySelectorAll('button,input,[tabindex="0"]'),out=[];
+ for(var i=0;i<arr.length;i++){var e=arr[i],r=e.getBoundingClientRect();
+  if(e.disabled||r.width<2||r.height<2)continue;out.push(e)}return out}
+function moveFocus(dir){var cur=document.activeElement,list=focusList();
+ if(!list.length)return;
+ if(!cur||cur===document.body||cur.tagName==='HTML'){list[0].focus();return}
+ var cr=cur.getBoundingClientRect(),cx=cr.left+cr.width/2,cy=cr.top+cr.height/2,best=null,score=1e9;
+ for(var i=0;i<list.length;i++){var e=list[i];if(e===cur)continue;
+  var r=e.getBoundingClientRect(),dx=r.left+r.width/2-cx,dy=r.top+r.height/2-cy,ok=false,s=0;
+  if(dir==='left'){ok=dx<-4&&Math.abs(dy)<Math.abs(dx)*1.7;s=-dx+Math.abs(dy)*1.5}
+  else if(dir==='right'){ok=dx>4&&Math.abs(dy)<Math.abs(dx)*1.7;s=dx+Math.abs(dy)*1.5}
+  else if(dir==='up'){ok=dy<-4&&Math.abs(dx)<Math.abs(dy)*2.4;s=-dy+Math.abs(dx)}
+  else{ok=dy>4&&Math.abs(dx)<Math.abs(dy)*2.4;s=dy+Math.abs(dx)}
+  if(ok&&s<score){score=s;best=e}}
+ if(best)best.focus()}
+function isConfirm(e){return e.key==='Enter'||e.key==='NumpadEnter'||
+ [13,23,66,85].indexOf(e.keyCode)>=0}
+function isBack(e){return e.key==='Escape'||e.key==='Backspace'||
+ [27,4,461,8].indexOf(e.keyCode)>=0}
+function dirOf(e){var k=e.key,c=e.keyCode;
+ if(k==='ArrowUp'||c===38||c===19)return'up';
+ if(k==='ArrowDown'||c===40||c===20)return'down';
+ if(k==='ArrowLeft'||c===37||c===21)return'left';
+ if(k==='ArrowRight'||c===39||c===22)return'right';return''}
+document.addEventListener('keydown',function(e){
+ var tag=(e.target&&e.target.tagName)||'',d=dirOf(e);
+ if(!started){if(isConfirm(e)||d){e.preventDefault();unlock()}return}
+ if(isBack(e)){if(pOpen){e.preventDefault();closePicker()}return}
+ if(isConfirm(e)){
+  if(tag==='INPUT'&&e.target.type!=='range'){e.preventDefault();
+   if(e.target.id==='pq')loadP();else if(e.target.id==='lanInput')applyLan();
+   else if(e.target.id==='seek')applySeek();return}
+  if(tag==='BUTTON'||tag==='A')return;
+  e.preventDefault();if(e.target&&e.target.click)e.target.click();return}
+ if(d){
+  if(tag==='INPUT'&&e.target.type==='range'&&(d==='left'||d==='right'))return;
+  if(tag==='INPUT'&&e.target.type!=='range'&&(d==='left'||d==='right'))return;
+  e.preventDefault();
+  if(tag==='INPUT'&&e.target.type==='range'){moveFocus(d);return}
+  if(!pOpen&&d==='left'){nudge(-5);return}
+  if(!pOpen&&d==='right'){nudge(5);return}
+  moveFocus(d);return}
+ var c=e.keyCode,k=(e.key||'').toLowerCase();
+ if((c>=49&&c<=57)||(c>=97&&c<=105)){e.preventDefault();hotKey(c>=97?c-96:c-48);return}
+ if(k==='s'||k==='/'){e.preventDefault();openPicker();setPTab('search');
+  setTimeout(function(){el('pq').focus()},80);return}
+ if(k==='q'){e.preventDefault();openPicker();setPTab('queue');return}
+ if(k==='n'){e.preventDefault();api('/api/next');toast('切歌');return}
+ if(k==='p'){e.preventDefault();api('/api/prev');toast('上一首');return}
+ if(k==='t'){e.preventDefault();switchTrack();return}
+ if(k===' '||c===179){e.preventDefault();toggle();return}
+});
+
+initAddr();poll();setInterval(poll,1500);setInterval(paint,120);
+</script>
+</body>
+</html>

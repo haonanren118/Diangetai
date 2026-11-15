@@ -1,0 +1,23 @@
+# 构建产物
+/familyktv/
+/familyktv-docker/
+/familyktv-docker-*.zip
+*.fpk
+*.tgz
+
+# 本地测试与临时产物
+_test/
+_test/**
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

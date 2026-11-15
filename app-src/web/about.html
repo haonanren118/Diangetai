@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>点歌台 · 关于</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#0b0e1a;--card:rgba(28,34,54,.72);--line:rgba(255,255,255,.09);--txt:#eef1ff;--sub:#93a0c4;--accent:#22c9a6;--pink:#e8517a;--gold:#ffe27a}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 40px;background:radial-gradient(1100px 560px at 8% -12%,#2b2352,transparent),radial-gradient(900px 480px at 102% 0,#103b45,transparent),var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+header{position:sticky;top:0;z-index:5;padding:14px 16px 12px;background:rgba(11,14,26,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:19px;letter-spacing:.6px;flex:1}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.links a{text-decoration:none;font-size:12px;padding:8px 11px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--sub);white-space:nowrap}
+main{max-width:820px;margin:0 auto;padding:18px 16px 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card h2{margin:0 0 14px;font-size:15px;color:var(--sub);font-weight:600;letter-spacing:.5px}
+.ver{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.ver b{font-size:42px;letter-spacing:1px;color:var(--accent);line-height:1.1}
+.ver span{font-size:13px;color:var(--sub)}
+.badge{display:inline-block;font-size:11px;padding:4px 9px;border-radius:7px;margin-left:8px;vertical-align:middle}
+.badge.ok{background:rgba(34,201,166,.16);color:var(--accent);border:1px solid rgba(34,201,166,.4)}
+.badge.warn{background:rgba(232,81,122,.16);color:#ffb9cb;border:1px solid rgba(232,81,122,.4)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px;margin-top:16px}
+.kv{font-size:13px;line-height:1.6;min-width:0}
+.kv i{display:block;font-style:normal;color:var(--sub);font-size:11px}
+.kv span{word-break:break-all}
+.path{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--accent);word-break:break-all}
+.log{font-size:13px;line-height:1.8;color:var(--txt);white-space:pre-wrap;word-break:break-word;margin:0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+input[type=text],input[type=url]{flex:1;min-width:180px;padding:10px 12px;font-size:14px;border-radius:9px;border:1px solid var(--line);background:rgba(10,14,26,.7);color:var(--txt);outline:none;font-family:inherit}
+input[type=file]{font-size:13px;color:var(--sub);max-width:100%}
+button{font-family:inherit;font-size:13px;padding:10px 15px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--txt);cursor:pointer;white-space:nowrap}
+button.pri{background:var(--accent);color:#05251f;border:0;font-weight:700}
+button.warn{color:#ffb9cb;border-color:rgba(232,81,122,.45)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus,input:focus,a:focus{outline:3px solid var(--gold);outline-offset:2px}
+.msg{font-size:13px;line-height:1.7;color:var(--sub);margin:10px 0 0;word-break:break-word}
+.msg.err{color:#ffb9cb}
+.msg.ok{color:var(--accent)}
+.pending{border-left:3px solid var(--accent);padding:10px 12px;background:rgba(34,201,166,.08);border-radius:0 9px 9px 0;margin-top:12px;font-size:13px;line-height:1.8}
+.bar{height:6px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;width:30%;background:var(--accent);animation:slide 1.4s ease-in-out infinite alternate}
+@keyframes slide{from{transform:translateX(-100%)}to{transform:translateX(330%)}}
+.tip{font-size:12px;color:var(--sub);line-height:1.8;margin:12px 0 0;opacity:.85}
+a.inline{color:var(--accent);text-decoration:none}
+@media (max-width:720px){
+  header{padding:12px;gap:8px}
+  h1{flex:1 1 100%;font-size:16px;white-space:nowrap}
+  .links{width:100%}
+  .links a{padding:7px 9px;font-size:11px}
+  main{padding:12px}
+  .card{padding:14px;border-radius:13px}
+  .ver b{font-size:34px}
+  .grid{grid-template-columns:1fr;gap:8px}
+  .row{gap:6px}
+  .row input[type=url],.row input[type=text],.row input[type=file]{flex:1 1 100%;min-width:0;order:0}
+  .row button{order:1;padding:9px 11px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>&#127908; 点歌台 · 关于</h1>
+  <div class="links">
+    <a href="/">点歌台</a>
+    <a href="/files">曲库文件夹</a>
+    <a href="/tv" target="_blank">大屏</a>
+  </div>
+</header>
+<main>
+  <div class="card">
+    <h2>当前版本</h2>
+    <div class="ver"><b id="ver">—</b><span id="sync"></span></div>
+    <div class="grid">
+      <div class="kv"><i>应用中心版本</i><span id="acver">—</span></div>
+      <div class="kv"><i>作者</i><span id="author">—</span></div>
+      <div class="kv"><i>访问端口</i><span id="port">—</span></div>
+      <div class="kv"><i>运行模式</i><span id="mode">—</span></div>
+      <div class="kv"><i>Python</i><span id="py">—</span></div>
+      <div class="kv"><i>共享目录</i><span class="path" id="share">—</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>更新日志</h2>
+    <p class="log" id="changelog">—</p>
+  </div>
+
+  <div class="card">
+    <h2>检查更新</h2>
+    <div class="row">
+      <input type="url" id="src" placeholder="更新源 version.json 地址（可留空，直接上传更新包）">
+      <button onclick="saveSource()">保存</button>
+      <button class="pri" onclick="check()">检查更新</button>
+    </div>
+    <p class="msg" id="checkMsg">留空时可在下方直接上传新版本 fpk。</p>
+  </div>
+
+  <div class="card">
+    <h2>在线升级 / 热更新</h2>
+    <div class="row">
+      <input type="file" id="pkg" accept=".fpk,.tgz,.gz">
+      <button onclick="upload()">上传更新包</button>
+    </div>
+    <div id="pending" class="pending" style="display:none"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="pri" id="btnApply" onclick="apply()" disabled>立即更新</button>
+      <button class="warn" id="btnRollback" onclick="rollback()" disabled>回滚到上一版本</button>
+    </div>
+    <div id="state" class="msg">准备就绪。</div>
+    <div class="bar" id="bar" style="display:none"><i></i></div>
+    <p class="tip">上传新版本 fpk 后点「立即更新」，应用会自动完成停止 → 安装 → 启动，并把<strong>应用中心版本号</strong>同步为新版本；期间服务中断约 10~30 秒，已点队列、曲库和封面都不会丢失。更新失败会自动回滚。独立 Docker 部署不支持此方式，请替换部署包后重启容器。</p>
+  </div>
+</main>
+<script>
+var el=function(i){return document.getElementById(i)};
+function get(u,cb){var x=new XMLHttpRequest();x.open('GET',u,true);
+ x.onreadystatechange=function(){if(x.readyState===4)cb(x.status===200?x.responseText:null)};
+ x.onerror=function(){cb(null)};x.send()}
+function post(u,cb){var x=new XMLHttpRequest();x.open('POST',u,true);
+ x.onreadystatechange=function(){if(x.readyState===4)cb(x.status===200?x.responseText:null)};
+ x.onerror=function(){cb(null)};x.send()}
+function js(u,cb,method,body){var x=new XMLHttpRequest();x.open(method||'GET',u,true);
+ x.onreadystatechange=function(){if(x.readyState===4){var d=null;try{d=JSON.parse(x.responseText)}catch(e){}cb(d)}};
+ x.onerror=function(){cb(null)};x.send(body||null)}
+function loadInfo(){js('/api/about',function(d){if(!d)return;
+ el('ver').textContent='v'+d.version;
+ el('acver').textContent=d.acVersion?('v'+d.acVersion):'独立部署';
+ el('sync').innerHTML=d.fpk?(d.sync?'<span class="badge ok">版本已同步</span>':'<span class="badge warn">版本不同步</span>'):'<span class="badge warn">独立部署</span>';
+ el('author').textContent=d.author;el('port').textContent=d.port;
+ el('py').textContent=d.python;el('share').textContent=d.shareLabel||d.share;
+ el('mode').textContent=d.fpk?'飞牛 fpk 原生运行':'独立 Docker / 本地运行';
+ el('changelog').textContent=d.changelog||'（无更新日志）';
+ el('src').value=d.source||'';
+ el('btnApply').disabled=!d.fpk;el('btnRollback').disabled=!d.fpk;
+ window.__fpk=d.fpk;window.__ver=d.version})}
+function saveSource(){var u=el('src').value.trim();
+ js('/api/update/source?url='+encodeURIComponent(u),function(d){
+  el('checkMsg').textContent=d&&d.ok?'更新源已保存':'保存失败';el('checkMsg').className='msg'},'POST')}
+function check(){var u=el('src').value.trim();
+ el('checkMsg').textContent='正在检查…';
+ js('/api/update/check?url='+encodeURIComponent(u),function(d){
+  if(!d){el('checkMsg').textContent='检查失败';return}
+  if(d.error){el('checkMsg').textContent=d.error;el('checkMsg').className='msg err';return}
+  if(!d.configured){el('checkMsg').textContent=d.tip;return}
+  if(!d.hasUpdate){el('checkMsg').textContent='已是最新版本 v'+d.current+'（远端 v'+d.latest+'）';return}
+  el('checkMsg').innerHTML='发现新版本 <b>v'+d.latest+'</b> '+(d.changelog||'')+
+   (d.url?' <a class="inline" href="javascript:fetchPkg()">下载更新包</a>':'');
+  el('checkMsg').className='msg ok';window.__fetchUrl=d.url})}
+function fetchPkg(){if(!window.__fetchUrl)return;
+ el('state').textContent='正在下载更新包…';
+ js('/api/update/fetch?url='+encodeURIComponent(window.__fetchUrl),function(d){
+  if(!d||!d.ok){el('state').textContent='下载失败：'+(d&&d.error||'');return}
+  showPending(d);el('state').textContent='更新包已就绪'},'POST')}
+function upload(){var f=el('pkg').files[0];if(!f){el('state').textContent='请先选择 fpk 文件';return}
+ var fd=new FormData();fd.append('pkg',f);
+ el('state').textContent='正在上传 '+f.name+' …';
+ var x=new XMLHttpRequest();x.open('POST','/api/update/upload',true);
+ x.onreadystatechange=function(){if(x.readyState!==4)return;var d=null;
+  try{d=JSON.parse(x.responseText)}catch(e){}
+  if(!d||!d.ok){el('state').textContent='上传失败：'+(d&&d.error||'未知错误');el('state').className='msg err';return}
+  showPending(d);el('state').textContent='更新包已就绪，可点「立即更新」';el('state').className='msg ok'};
+ x.onerror=function(){el('state').textContent='上传失败'};x.send(fd)}
+function showPending(d){window.__pending=d;
+ el('pending').style.display='block';
+ el('pending').innerHTML='<b>v'+d.version+'</b>（当前 v'+d.current+'）'+
+  (d.newer?' · 可升级':' · 版本不高于当前')+'<br>'+(d.changelog||'（无更新日志）')+
+  '<br>包大小 '+(d.size/1024).toFixed(1)+' KB';
+ el('btnApply').disabled=!(d.newer&&window.__fpk)}
+function apply(){if(!window.__pending||!window.__pending.newer)return;
+ if(!confirm('确定更新到 v'+window.__pending.version+'？更新期间服务会中断约 10~30 秒，已点队列与曲库保留。'))return;
+ el('btnApply').disabled=true;el('bar').style.display='block';
+ js('/api/update/apply',function(d){if(!d||!d.ok){el('state').textContent='启动失败：'+(d&&d.error||'');
+  el('state').className='msg err';el('bar').style.display='none';el('btnApply').disabled=false;return}
+  el('state').textContent='更新进行中，请勿关闭页面…';poll()},'POST')}
+function rollback(){if(!confirm('确定回滚到上一版本？'))return;
+ js('/api/update/rollback',function(d){if(!d||!d.ok){el('state').textContent='回滚失败：'+(d&&d.error||'');return}
+  el('bar').style.display='block';el('state').textContent='正在回滚…';poll()},'POST')}
+function poll(){js('/api/update/status',function(d){
+ if(!d){setTimeout(function(){get('/ping',function(x){if(x==='ok')location.reload();else setTimeout(poll,2500)})},2500);return}
+ var ph=d.phase||'idle';
+ el('state').textContent=(d.detail||ph)+(d.error?(' · '+d.error):'');
+ var busy=(ph==='installing'||ph==='starting'||ph==='rollingback');
+ if(d.pending)showPending(d.pending);
+ el('btnApply').disabled=busy||!(d.pending&&d.pending.newer&&window.__fpk);
+ el('btnRollback').disabled=busy||!(window.__fpk&&d.backups&&d.backups.length);
+ el('bar').style.display=busy?'block':'none';
+ if(busy){setTimeout(poll,2000);return}
+ if(ph==='done'||ph==='rolledback'){
+  get('/ping',function(x){setTimeout(function(){location.reload()},x==='ok'?1200:2500)});return}
+ if(ph==='failed')el('state').className='msg err';
+})}
+loadInfo();poll();
+</script>
+</body>
+</html>
