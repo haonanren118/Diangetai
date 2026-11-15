@@ -4,6 +4,8 @@
 
 原生 Python 服务，**不依赖 Docker，也不需要已 root 的安卓设备**；仅使用 Python 标准库，无第三方运行依赖。当前版本 **0.0.7**，以 [MIT 协议](LICENSE) 开源。
 
+> **项目主页**：https://haonanren118.github.io/Diangetai/ —— 功能介绍、部署步骤、常见问题与下载入口。
+>
 > 仓库只包含源码与构建脚本；可直接安装的 `.fpk` 与独立 Docker 部署包请到 [Releases](../../releases) 下载。
 
 ## 功能
