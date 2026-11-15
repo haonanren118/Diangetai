@@ -2,7 +2,7 @@
 
 一个部署在 NAS 上的家庭点歌应用：手机扫码点歌，电视 / 平板大屏播放，逐字卡拉 OK 歌词、透明粒子画面、歌曲封面、原唱 / 伴奏切换、拼音搜歌与多端队列管理。
 
-原生 Python 服务，**不依赖 Docker，也不需要已 root 的安卓设备**；仅使用 Python 标准库，无第三方运行依赖。当前版本 **0.0.9**，以 [MIT 协议](LICENSE) 开源。
+原生 Python 服务，**不依赖 Docker，也不需要已 root 的安卓设备**；仅使用 Python 标准库，无第三方运行依赖。当前版本 **0.0.10**，以 [MIT 协议](LICENSE) 开源。
 
 > **项目主页**：https://haonanren118.github.io/Diangetai/ —— 功能介绍、部署步骤、常见问题与下载入口。
 >
@@ -23,13 +23,13 @@
 
 ### 方式一：飞牛 NAS（fnOS）fpk
 
-1. 从 [Releases](../../releases) 下载 `diangetai-0.0.9.fpk`。
+1. 从 [Releases](../../releases) 下载 `diangetai-0.0.10.fpk`。
 2. 在飞牛「应用中心」手动安装该 fpk（也可由 `appcenter-cli install-local` 走正规安装链路）。
 3. 安装完成后应用自动启动，端口 `18090`。
 
 ### 方式二：独立 Docker 部署包
 
-下载 `diangetai-docker-0.0.9.zip`，解压后在目录内执行：
+下载 `diangetai-docker-0.0.10.zip`，解压后在目录内执行：
 
 ```
 docker compose up -d --build
@@ -78,9 +78,9 @@ docker compose up -d --build
 
 ```json
 {
-  "version": "0.0.9",
+  "version": "0.0.10",
   "changelog": "更新日志",
-  "url": "https://github.com/haonanren118/Diangetai/releases/download/v0.0.9/diangetai-0.0.9.fpk"
+  "url": "https://github.com/haonanren118/Diangetai/releases/download/v0.0.10/diangetai-0.0.10.fpk"
 }
 ```
 

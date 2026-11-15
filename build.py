@@ -16,15 +16,14 @@ SRC = ROOT / 'app-src'
 # ---- 应用元数据（用户指定） ----
 APPNAME = 'familyktv'          # 内部标识，全小写；新应用，不覆盖已发布的 openhwlab-ktv 2.0.0-2
 DISPLAY = '点歌台'
-VERSION = '0.0.9'          # 全新版本标识：检查更新修复与新版提示，不覆盖已发布版本
+VERSION = '0.0.10'         # 全新版本标识：关于页自动刷新死循环修复，不覆盖已发布版本
 AUTHOR = 'haonanren118'        # 作者署名（GitHub / Gitee 身份）
 PORT = 18090                   # 宿主机端口；与已装的 Docker 版 18089 并存，互不冲突
 INNER_PORT = 8089              # 仅独立 Docker 部署包的容器内端口
 SHARE_NAME = 'diangetai'       # 用户可见的共享文件夹名，不含内部应用标识
-CHANGELOG = ('%s 修复检查更新把 Python 解析异常显示为 Expecting value：'
-             '非 JSON / 空内容 / 非法 version 的更新源给出明确中文提示与响应摘要；'
-             '留空可清除已保存源，内置官方更新源一键填入；'
-             '发现新版本在点歌台与关于页主动提示'
+CHANGELOG = ('%s 修复关于页不停自动刷新：升级完成后更新状态会一直停在完成态，'
+             '页面每次加载又触发一次刷新，形成死循环；'
+             '现在仅本页真正发起的升级才刷新，且每次升级最多刷新一次'
              % VERSION)
 
 FPK = ROOT / APPNAME
