@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://haonanren118.github.io/Diangetai/sitemap.xml

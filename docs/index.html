@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>点歌台 Diangetai｜飞牛 NAS 家庭点歌系统 · 手机扫码点歌 / 电视大屏卡拉OK</title>
+<meta name="description" content="点歌台（Diangetai）是部署在飞牛 NAS 上的免费开源家庭点歌系统：手机扫码点歌、电视大屏逐字卡拉OK 歌词、歌曲封面、原唱伴奏切换、拼音搜歌与多端队列管理。原生 Python 服务，不依赖 Docker，MIT 协议开源。">
+<meta name="keywords" content="点歌台, Diangetai, 飞牛NAS, fnOS, NAS点歌, 家庭点歌系统, 手机点歌, 电视大屏歌词, 卡拉OK字幕, 自建点歌系统, fpk, 拼音搜歌, 原唱伴奏切换, 应用内热更新, NAS karaoke, self-hosted karaoke, MIT">
+<meta name="author" content="haonanren118">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta name="theme-color" content="#070b16">
+<link rel="canonical" href="https://haonanren118.github.io/Diangetai/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="点歌台 Diangetai">
+<meta property="og:title" content="点歌台 Diangetai｜把客厅变成点歌台">
+<meta property="og:description" content="手机扫码点歌，电视大屏逐字歌词。飞牛 NAS 原生应用，不依赖 Docker，免费开源。">
+<meta property="og:url" content="https://haonanren118.github.io/Diangetai/">
+<meta property="og:image" content="https://haonanren118.github.io/Diangetai/og-image.svg">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="点歌台 Diangetai｜飞牛 NAS 家庭点歌系统">
+<meta name="twitter:description" content="手机扫码点歌，电视大屏逐字歌词，MIT 开源，不依赖 Docker。">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "点歌台 Diangetai",
+      "alternateName": "Diangetai",
+      "description": "部署在 NAS 上的开源家庭点歌系统，手机扫码点歌、电视大屏逐字卡拉OK 歌词、原唱伴奏切换、拼音搜歌与多端队列管理。",
+      "applicationCategory": "MultimediaApplication",
+      "applicationSubCategory": "家庭点歌 / 卡拉OK",
+      "operatingSystem": "飞牛 NAS (fnOS)、Linux、Docker",
+      "softwareVersion": "0.0.7",
+      "programmingLanguage": "Python",
+      "license": "https://github.com/haonanren118/Diangetai/blob/main/LICENSE",
+      "downloadUrl": "https://github.com/haonanren118/Diangetai/releases/tag/v0.0.7",
+      "url": "https://haonanren118.github.io/Diangetai/",
+      "codeRepository": "https://github.com/haonanren118/Diangetai",
+      "author": { "@type": "Person", "name": "haonanren118", "url": "https://github.com/haonanren118" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+      "featureList": "手机扫码点歌, 电视遥控器与USB键盘点歌, 逐字歌词染色, 粒子画面, 歌曲封面, 原唱伴奏切换, 拼音搜歌, 已点队列管理, 曲库文件上传, 应用内热更新"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "点歌台是什么？可以在哪些设备上运行？", "acceptedAnswer": { "@type": "Answer", "text": "点歌台（Diangetai）是部署在 NAS 上的免费开源家庭点歌系统。推荐飞牛 NAS（fnOS）安装 fpk 原生包；任意 Docker 主机可用独立 compose 部署包。手机负责点歌，电视、平板或电脑浏览器负责大屏播放。" } },
+        { "@type": "Question", "name": "需要 Docker 或已 root 的安卓盒子吗？", "acceptedAnswer": { "@type": "Answer", "text": "都不需要。飞牛版是宿主直接运行 Python 3.11 标准库服务的原生应用，不依赖容器、不依赖 root 设备；只有独立部署包才使用 Docker。" } },
+        { "@type": "Question", "name": "手机怎么点歌？必须联网吗？", "acceptedAnswer": { "@type": "Answer", "text": "打开大屏页右上角二维码扫码即可进入手机点歌台。手机与电视处于同一局域网即可使用；在线曲库需要外网，本地曲库在纯局域网内也能播放。" } },
+        { "@type": "Question", "name": "支持本地歌曲、歌词和封面吗？", "acceptedAnswer": { "@type": "Answer", "text": "支持。把 mp3、mp4、flac、wav 等歌曲放进共享目录的 music 文件夹，同名 .lrc 作为歌词，同名 jpg/png 或 cover.jpg 作为封面；也可以在「曲库文件夹」页直接从手机上传。" } },
+        { "@type": "Question", "name": "原唱和伴奏怎么切换？", "acceptedAnswer": { "@type": "Answer", "text": "大屏或手机点「切伴奏」即可。曲库里同时放「歌名-原唱」与「歌名-伴奏」时使用真实伴奏音轨；没有配对文件时，大屏用 Web Audio 立体声反相抵消实时生成消人声伴奏。切换不打断播放进度，切歌自动恢复原唱。" } },
+        { "@type": "Question", "name": "升级会不会清空已点队列？", "acceptedAnswer": { "@type": "Answer", "text": "不会。关于页上传新版 fpk 可一键热更新，走正规安装链路并同步应用中心版本号，队列、歌曲与封面保留，安装失败自动回滚到备份版本。" } },
+        { "@type": "Question", "name": "开源协议是什么？可以商用吗？", "acceptedAnswer": { "@type": "Answer", "text": "采用 MIT 协议，允许自由使用、修改、再发行与商用，只需保留版权与许可声明。在线曲库使用第三方公开接口，音源版权归各平台所有，项目仅供个人家庭使用。" } }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+:root{--bg:#070b16;--card:rgba(255,255,255,.045);--line:rgba(255,255,255,.10);--txt:#eef1ff;--sub:#9aa5c4;--violet:#8b7bff;--pink:#ff5c8a;--cyan:#4dd8ff;--radius:20px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,-apple-system,sans-serif;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body:before{content:"";position:fixed;inset:0;z-index:-2;background:
+ radial-gradient(680px 480px at 12% -5%,rgba(139,123,255,.26),transparent 65%),
+ radial-gradient(620px 460px at 92% 8%,rgba(255,92,138,.17),transparent 65%),
+ radial-gradient(760px 520px at 60% 100%,rgba(77,216,255,.12),transparent 70%),var(--bg)}
+a{color:inherit;text-decoration:none}
+.wrap{width:min(1120px,calc(100% - 40px));margin:0 auto}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.grad{background:linear-gradient(100deg,var(--violet),var(--pink) 55%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+header{position:sticky;top:0;z-index:20;background:rgba(7,11,22,.72);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07)}
+.nav{display:flex;align-items:center;gap:22px;height:66px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;letter-spacing:.5px}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--violet),var(--pink));display:grid;place-items:center;font-size:19px;box-shadow:0 6px 22px rgba(139,123,255,.4)}
+.navlinks{display:flex;gap:20px;margin-left:auto;font-size:14px;color:var(--sub)}
+.navlinks a:hover{color:var(--txt)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:12px;font-weight:700;font-size:15px;border:1px solid var(--line);background:rgba(255,255,255,.06);transition:transform .18s,box-shadow .18s,border-color .18s}
+.btn:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.28)}
+.btn.pri{background:linear-gradient(100deg,var(--violet),#b45cff 55%,var(--pink));border:none;box-shadow:0 10px 30px rgba(139,123,255,.32)}
+.btn.sm{padding:9px 15px;font-size:13px}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:46px;align-items:center;padding:76px 0 64px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;border:1px solid rgba(139,123,255,.38);background:rgba(139,123,255,.10);font-size:13px;color:#c9c2ff}
+h1{font-size:clamp(34px,5.2vw,58px);line-height:1.2;margin:22px 0 16px;letter-spacing:-1px;font-weight:850}
+.lead{font-size:17px;color:var(--sub);max-width:540px;margin:0 0 26px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.chip{padding:6px 12px;border-radius:9px;font-size:12px;color:var(--sub);border:1px solid var(--line);background:rgba(255,255,255,.035)}
+.screen{position:relative;padding:16px;border-radius:24px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.screen .bar{display:flex;gap:6px;margin-bottom:12px}
+.screen .dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.22)}
+.stage{position:relative;height:300px;border-radius:14px;overflow:hidden;background:linear-gradient(150deg,#141a38,#241640 55%,#0d1630);padding:26px;display:flex;flex-direction:column;justify-content:center}
+.stage:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 22% 30%,rgba(139,123,255,.35),transparent 42%),radial-gradient(circle at 82% 72%,rgba(255,92,138,.28),transparent 45%)}
+.spark{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;opacity:.55;box-shadow:0 0 12px 2px rgba(180,200,255,.8)}
+.coverbox{position:absolute;left:24px;top:24px;width:74px;height:74px;border-radius:12px;background:linear-gradient(140deg,#6b5bff,#ff5c8a);box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.lyric{position:relative;text-align:center;font-weight:800;letter-spacing:2px}
+.lyric.prev,.lyric.next{font-size:15px;color:rgba(255,255,255,.38);margin:10px 0}
+.lyric.cur{font-size:clamp(22px,3vw,32px);margin:14px 0;background:linear-gradient(90deg,#fff 0 42%,var(--cyan) 42% 58%,rgba(255,255,255,.55) 58%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.progress{position:relative;margin-top:22px;height:5px;border-radius:99px;background:rgba(255,255,255,.18)}
+.progress i{display:block;height:100%;width:46%;border-radius:99px;background:linear-gradient(90deg,var(--violet),var(--pink))}
+.stage-foot{position:relative;display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:rgba(255,255,255,.5)}
+section{padding:56px 0}
+h2{font-size:clamp(25px,3.4vw,36px);margin:0 0 10px;letter-spacing:-.5px}
+.sect-lead{color:var(--sub);margin:0 0 30px}
+.grid{display:grid;gap:16px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{padding:24px;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);border-color:rgba(139,123,255,.4)}
+.ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:linear-gradient(140deg,rgba(139,123,255,.22),rgba(255,92,138,.14));border:1px solid rgba(139,123,255,.28);margin-bottom:14px}
+.card h3{margin:0 0 7px;font-size:17px}
+.card p{margin:0;color:var(--sub);font-size:14px}
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.step{padding:26px;position:relative}
+.step:before{counter-increment:s;content:"0" counter(s);display:block;font-size:30px;font-weight:850;margin-bottom:12px;background:linear-gradient(100deg,var(--violet),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.step h3{margin:0 0 8px;font-size:17px}
+.step p{margin:0;color:var(--sub);font-size:14px}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:rgba(139,123,255,.12);border:1px solid rgba(139,123,255,.2);padding:2px 7px;border-radius:6px;font-size:13px;color:#cfc7ff}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:13px 14px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--sub);font-weight:600;width:32%}
+tr:last-child td,tr:last-child th{border-bottom:none}
+.faq{display:grid;gap:12px}
+details{padding:18px 22px;border-radius:15px}
+summary{cursor:pointer;font-weight:700;font-size:15px;list-style:none;display:flex;justify-content:space-between;gap:14px}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"+";color:var(--violet);font-size:20px;line-height:1}
+details[open] summary:after{content:"−"}
+details p{margin:12px 0 0;color:var(--sub);font-size:14px}
+.download{text-align:center;padding:44px 28px;background:linear-gradient(135deg,rgba(139,123,255,.14),rgba(255,92,138,.08)),var(--card)}
+.download h2{margin-bottom:8px}
+.dl-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.hint{color:var(--sub);font-size:13px;margin-top:18px}
+footer{border-top:1px solid var(--line);padding:34px 0 44px;margin-top:40px;color:var(--sub);font-size:13px}
+.foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+.foot a:hover{color:var(--txt)}
+.links{display:flex;gap:18px;flex-wrap:wrap}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:36px;padding:50px 0 40px}.g3,.steps{grid-template-columns:repeat(2,1fr)}.navlinks{display:none}}
+@media(max-width:640px){.wrap{width:min(100% - 28px,1120px)}.g3,.g2,.steps{grid-template-columns:1fr}section{padding:40px 0}.stage{height:250px}.lead{font-size:15px}.btn{padding:11px 17px;font-size:14px}th{width:42%}.nav{gap:10px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top"><span class="logo">&#9834;</span><span>点歌台 <span class="grad">Diangetai</span></span></a>
+    <nav class="navlinks">
+      <a href="#features">功能</a><a href="#deploy">部署</a><a href="#specs">规格</a><a href="#faq">常见问题</a><a href="#download">下载</a>
+    </nav>
+    <a class="btn sm" href="https://github.com/haonanren118/Diangetai" rel="noopener">GitHub &#8599;</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <div>
+      <span class="badge">&#9679; v0.0.7 · MIT 开源 · 免费自用</span>
+      <h1>把客厅变成<br><span class="grad">点歌台</span></h1>
+      <p class="lead">手机扫码点歌，电视大屏逐字歌词。跑在飞牛 NAS 上的原生点歌应用，不依赖 Docker、不需要 root 设备，只用 Python 标准库，装好即用。</p>
+      <div class="cta">
+        <a class="btn pri" href="#download">下载安装包 &#8595;</a>
+        <a class="btn" href="https://github.com/haonanren118/Diangetai" rel="noopener">查看源码</a>
+      </div>
+      <div class="chips">
+        <span class="chip">飞牛 NAS / fnOS</span><span class="chip">原生 fpk</span><span class="chip">不依赖容器</span>
+        <span class="chip">拼音搜歌</span><span class="chip">原唱 / 伴奏</span><span class="chip">应用内热更新</span>
+      </div>
+    </div>
+    <div class="screen glass" aria-label="大屏播放效果示意">
+      <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="stage">
+        <span class="spark" style="left:14%;top:18%"></span><span class="spark" style="left:31%;top:70%;opacity:.35"></span>
+        <span class="spark" style="left:68%;top:24%;opacity:.4"></span><span class="spark" style="left:86%;top:58%"></span>
+        <span class="spark" style="left:52%;top:84%;opacity:.3"></span>
+        <div class="coverbox"></div>
+        <div class="lyric prev">上一句歌词</div>
+        <div class="lyric cur">正在唱的这一句</div>
+        <div class="lyric next">下一句歌词</div>
+        <div class="progress"><i></i></div>
+        <div class="stage-foot"><span>01:12</span><span>已点 3 首 · 原唱</span><span>03:48</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="features">
+    <div class="wrap">
+      <h2>唱歌需要的，都在这里</h2>
+      <p class="sect-lead">从手机点歌到电视大屏，从逐字歌词到原唱伴奏，一套全部搞定。</p>
+      <div class="grid g3">
+        <article class="card glass"><div class="ico">&#128241;</div><h3>手机扫码点歌</h3><p>大屏右上角二维码扫一下就进入点歌台，歌名、歌手、拼音全拼与首字母都能搜，例如 zjl、zhoujielun。</p></article>
+        <article class="card glass"><div class="ico">&#127916;</div><h3>电视大屏逐字歌词</h3><p>卡拉OK 式逐字染色，支持带字级时间戳的 LRC；上一句、当前句、下一句同屏，进度条可拖动。</p></article>
+        <article class="card glass"><div class="ico">&#127925;</div><h3>原唱 / 伴奏一键切换</h3><p>有配对伴奏文件就用真实音轨，没有就用浏览器实时消人声；切换不打断进度，切歌自动恢复原唱。</p></article>
+        <article class="card glass"><div class="ico">&#10024;</div><h3>封面与粒子画面</h3><p>专辑封面、虚化背景与透明粒子层，播放、暂停、无歌曲时都不黑屏。</p></article>
+        <article class="card glass"><div class="ico">&#128203;</div><h3>多端已点队列</h3><p>手机与大屏都能看队列、跳转播放、删除、清空；队列持久化保存，重启自动恢复。</p></article>
+        <article class="card glass"><div class="ico">&#128193;</div><h3>曲库文件夹入口</h3><p>应用内浏览与上传歌曲、封面、歌词，一键复制共享目录路径，不用进后台找文件。</p></article>
+        <article class="card glass"><div class="ico">&#9000;&#65039;</div><h3>遥控器与键盘</h3><p>方向键选歌、OK 确认、数字键 1~9 点第 N 首；USB 键盘 S 搜歌、N 切歌、T 切换音轨。</p></article>
+        <article class="card glass"><div class="ico">&#128260;</div><h3>应用内热更新</h3><p>关于页上传新 fpk 一键升级，应用中心版本号同步跟随，队列与曲库保留，失败自动回滚。</p></article>
+        <article class="card glass"><div class="ico">&#128274;</div><h3>本地优先 · 开源</h3><p>纯 Python 标准库实现，无第三方运行依赖；MIT 协议开源，代码可自行审查与修改。</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="deploy">
+    <div class="wrap">
+      <h2>三步开始唱</h2>
+      <p class="sect-lead">飞牛 NAS 用原生安装包，其它主机用独立 Docker 部署包。</p>
+      <div class="steps">
+        <article class="step glass"><h3>安装</h3><p>下载 <code>diangetai-0.0.7.fpk</code>，在飞牛「应用中心」手动安装；Docker 主机解压部署包后执行 <code>docker compose up -d --build</code>。</p></article>
+        <article class="step glass"><h3>打开大屏</h3><p>电视或平板浏览器访问 <code>http://&lt;NAS_IP&gt;:18090/tv</code>，点一次「开启大屏」允许自动播放。</p></article>
+        <article class="step glass"><h3>扫码点歌</h3><p>手机扫右上角二维码，或访问 <code>http://&lt;NAS_IP&gt;:18090/</code>，搜歌后点一下即可加入队列。</p></article>
+      </div>
+      <p class="hint" style="margin-top:18px">把 <code>&lt;NAS_IP&gt;</code> 换成 NAS 在局域网中的地址，手机与电视保持同一局域网即可。</p>
+    </div>
+  </section>
+
+  <section id="specs">
+    <div class="wrap grid g2" style="gap:16px;align-items:start">
+      <div class="glass" style="padding:26px">
+        <h2 style="font-size:24px">技术规格</h2>
+        <table>
+          <tr><th>当前版本</th><td>0.0.7</td></tr>
+          <tr><th>运行环境</th><td>飞牛 NAS（fnOS）原生 Python 3.11 / Docker 主机</td></tr>
+          <tr><th>依赖</th><td>仅 Python 标准库，无第三方运行依赖</td></tr>
+          <tr><th>服务端口</th><td>18090</td></tr>
+          <tr><th>共享文件夹</th><td>diangetai（界面显示「点歌台 / music」）</td></tr>
+          <tr><th>曲库格式</th><td>mp3 / mp4 / m4a / flac / wav / aac / ogg / mkv / avi / mov</td></tr>
+          <tr><th>开源协议</th><td><a href="https://github.com/haonanren118/Diangetai/blob/main/LICENSE" rel="noopener" style="color:#cfc7ff">MIT License</a></td></tr>
+        </table>
+      </div>
+      <div class="glass" style="padding:26px">
+        <h2 style="font-size:24px">页面入口</h2>
+        <table>
+          <tr><th>手机点歌台</th><td><code>/</code></td></tr>
+          <tr><th>电视大屏</th><td><code>/tv</code></td></tr>
+          <tr><th>曲库文件夹</th><td><code>/files</code></td></tr>
+          <tr><th>关于与版本管理</th><td><code>/about</code></td></tr>
+        </table>
+        <p class="hint">在线曲库使用网易云公开接口，只保留实测可播放的曲目；音源版权归各平台所有，项目仅供个人家庭使用。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <h2>常见问题</h2>
+      <p class="sect-lead">安装、搜歌、切换音轨、升级，这些问题最常被问到。</p>
+      <div class="faq">
+        <details class="glass" open><summary>点歌台是什么？可以在哪些设备上运行？</summary><p>部署在 NAS 上的免费开源家庭点歌系统。推荐飞牛 NAS（fnOS）安装 fpk 原生包；任意 Docker 主机可用独立 compose 部署包。手机负责点歌，电视、平板或电脑浏览器负责大屏播放。</p></details>
+        <details class="glass"><summary>需要 Docker 或已 root 的安卓盒子吗？</summary><p>都不需要。飞牛版是宿主直接运行 Python 3.11 标准库服务的原生应用，不依赖容器、不依赖 root 设备；只有独立部署包才使用 Docker。</p></details>
+        <details class="glass"><summary>手机怎么点歌？必须联网吗？</summary><p>打开大屏页右上角二维码扫码即可进入手机点歌台。手机与电视处于同一局域网即可使用；在线曲库需要外网，本地曲库在纯局域网内也能播放。</p></details>
+        <details class="glass"><summary>支持本地歌曲、歌词和封面吗？</summary><p>支持。把歌曲放进共享目录的 music 文件夹，同名 .lrc 作为歌词，同名 jpg/png 或 cover.jpg 作为封面；也可以在「曲库文件夹」页直接从手机上传。</p></details>
+        <details class="glass"><summary>原唱和伴奏怎么切换？</summary><p>大屏或手机点「切伴奏」即可。曲库里同时放「歌名-原唱」与「歌名-伴奏」时使用真实伴奏音轨；没有配对文件时，大屏用 Web Audio 立体声反相抵消实时生成消人声伴奏。切换不打断播放进度，切歌自动恢复原唱。</p></details>
+        <details class="glass"><summary>升级会不会清空已点队列？</summary><p>不会。关于页上传新版 fpk 可一键热更新，走正规安装链路并同步应用中心版本号，队列、歌曲与封面保留，安装失败自动回滚到备份版本。</p></details>
+        <details class="glass"><summary>开源协议是什么？可以商用吗？</summary><p>采用 MIT 协议，允许自由使用、修改、再发行与商用，只需保留版权与许可声明。在线曲库使用第三方公开接口，音源版权归各平台所有，项目仅供个人家庭使用。</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section id="download">
+    <div class="wrap">
+      <div class="download glass">
+        <h2>免费下载，立刻开唱</h2>
+        <p class="sect-lead" style="margin-bottom:0">v0.0.7 · 两个安装包 · MIT 开源 · 无需注册</p>
+        <div class="dl-row">
+          <a class="btn pri" href="https://github.com/haonanren118/Diangetai/releases/download/v0.0.7/diangetai-0.0.7.fpk" rel="noopener">下载飞牛 fpk 安装包</a>
+          <a class="btn" href="https://github.com/haonanren118/Diangetai/releases/download/v0.0.7/diangetai-docker-0.0.7.zip" rel="noopener">下载 Docker 部署包</a>
+        </div>
+        <p class="hint">完整更新日志与 SHA256 校验值见 <a href="https://github.com/haonanren118/Diangetai/releases/tag/v0.0.7" rel="noopener" style="color:#cfc7ff">Release 页面</a>。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>点歌台 Diangetai · MIT License · Copyright &copy; 2026 haonanren118<br><span style="font-size:12px">仅供个人家庭使用，音源版权归各平台所有</span></div>
+    <div class="links">
+      <a href="https://github.com/haonanren118/Diangetai" rel="noopener">GitHub</a>
+      <a href="https://github.com/haonanren118/Diangetai/releases" rel="noopener">Releases</a>
+      <a href="https://github.com/haonanren118/Diangetai/issues" rel="noopener">Issues</a>
+      <a href="https://github.com/haonanren118/Diangetai/blob/main/LICENSE" rel="noopener">开源协议</a>
+      <span>QQ 交流群 708144970</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
