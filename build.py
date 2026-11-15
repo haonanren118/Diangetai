@@ -16,14 +16,14 @@ SRC = ROOT / 'app-src'
 # ---- 应用元数据（用户指定） ----
 APPNAME = 'familyktv'          # 内部标识，全小写；新应用，不覆盖已发布的 openhwlab-ktv 2.0.0-2
 DISPLAY = '点歌台'
-VERSION = '0.0.7'          # 0.0.6 已被热更新验证包占用，正式版跳号保证版本与内容一一对应
+VERSION = '0.0.8'          # 全新版本标识：IPv4 连接层修复，不覆盖已发布版本
 AUTHOR = 'haonanren118'        # 作者署名（GitHub / Gitee 身份）
 PORT = 18090                   # 宿主机端口；与已装的 Docker 版 18089 并存，互不冲突
 INNER_PORT = 8089              # 仅独立 Docker 部署包的容器内端口
 SHARE_NAME = 'diangetai'       # 用户可见的共享文件夹名，不含内部应用标识
-CHANGELOG = ('%s 修复原唱/伴奏切换无效：本地单曲与在线歌曲均可切换，'
-             '大屏用立体声消人声实时生成伴奏且不打断播放进度；'
-             '曲库内有「歌名-伴奏.mp3」时自动使用真实伴奏音轨；切歌自动恢复原唱'
+CHANGELOG = ('%s 修复部分 NAS 上歌源与热歌榜一直加载：外网连接强制走 IPv4，'
+             '避免机器有 IPv6 地址但出口不通时每个请求先等超时再回退；'
+             '更新源检查与下载同样受益；纯 IPv6 环境可设 KTV_IPV4_ONLY=0 关闭'
              % VERSION)
 
 FPK = ROOT / APPNAME

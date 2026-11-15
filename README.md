@@ -2,7 +2,7 @@
 
 一个部署在 NAS 上的家庭点歌应用：手机扫码点歌，电视 / 平板大屏播放，逐字卡拉 OK 歌词、透明粒子画面、歌曲封面、原唱 / 伴奏切换、拼音搜歌与多端队列管理。
 
-原生 Python 服务，**不依赖 Docker，也不需要已 root 的安卓设备**；仅使用 Python 标准库，无第三方运行依赖。当前版本 **0.0.7**，以 [MIT 协议](LICENSE) 开源。
+原生 Python 服务，**不依赖 Docker，也不需要已 root 的安卓设备**；仅使用 Python 标准库，无第三方运行依赖。当前版本 **0.0.8**，以 [MIT 协议](LICENSE) 开源。
 
 > **项目主页**：https://haonanren118.github.io/Diangetai/ —— 功能介绍、部署步骤、常见问题与下载入口。
 >
@@ -23,13 +23,13 @@
 
 ### 方式一：飞牛 NAS（fnOS）fpk
 
-1. 从 [Releases](../../releases) 下载 `diangetai-0.0.7.fpk`。
+1. 从 [Releases](../../releases) 下载 `diangetai-0.0.8.fpk`。
 2. 在飞牛「应用中心」手动安装该 fpk（也可由 `appcenter-cli install-local` 走正规安装链路）。
 3. 安装完成后应用自动启动，端口 `18090`。
 
 ### 方式二：独立 Docker 部署包
 
-下载 `diangetai-docker-0.0.7.zip`，解压后在目录内执行：
+下载 `diangetai-docker-0.0.8.zip`，解压后在目录内执行：
 
 ```
 docker compose up -d --build
@@ -71,6 +71,45 @@ docker compose up -d --build
 4. 已点队列、歌曲、封面保留；安装失败自动回滚到备份版本。
 
 **版本纪律**：每个发布内容使用全新版本标识，已发布的旧版本包与 Release 不会被覆盖或替换。
+
+## 排障：歌源 / 热歌榜一直在加载
+
+**现象**：装好后打开点歌台，热歌榜转圈几十秒甚至一直显示「加载中」，本地曲库却正常，网速也不慢。
+
+**根因**：有些 NAS / 主机拿到了 IPv6 地址和默认路由，但 IPv6 出口实际不通。系统默认把 AAAA 记录排在 A 记录前面，建连时先尝试 IPv6，一直等到请求超时（12 秒）才回退 IPv4；一个榜单要问 4 个歌单，排队就是 40 秒起步。
+
+**0.0.8 起已在代码层修复**：外网连接默认只解析 IPv4（A 记录），不再依赖机器的 `/etc/gai.conf`；更新源检查与更新包下载同样生效。升级到 0.0.8 后重启一次应用即可，无需改系统配置。
+
+自行确认是不是同一问题（把 `<NAS_IP>` 换成 NAS 的局域网地址）：
+
+```bash
+# 应用接口耗时；冷启动会有一次探测，之后应明显变快
+curl -s -o /dev/null -w '%{time_total}\n' http://<NAS_IP>:18090/api/hot
+
+# 对比 IPv6 与 IPv4 出口
+curl -6 -m 6 -s -o /dev/null -w 'ipv6 %{http_code} %{time_total}\n' https://music.163.com/
+curl -4 -m 6 -s -o /dev/null -w 'ipv4 %{http_code} %{time_total}\n' https://music.163.com/
+```
+
+若 `curl -6` 超时而 `curl -4` 正常，就是这个原因。可选的系统级修复（对所有程序生效，需要 root）：
+
+```conf
+# /etc/gai.conf
+# 必须是 100：模板里注释掉的 10 低于 IPv6 默认的 40，去了注释也不生效
+precedence ::ffff:0:0/96  100
+```
+
+一旦写了自定义 `precedence`，系统默认表就不再生效，稳妥起见把默认表补齐：
+
+```conf
+precedence  ::1/128       50
+precedence  ::/0          40
+precedence  2002::/16     30
+precedence  ::/96         20
+precedence  ::ffff:0:0/96 100
+```
+
+改完重启应用或容器，清掉进程内的 DNS / 连接缓存。纯 IPv6 网络可设环境变量 `KTV_IPV4_ONLY=0` 关闭应用内的 IPv4 优先策略。
 
 ## 从源码构建
 

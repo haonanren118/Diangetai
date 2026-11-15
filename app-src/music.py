@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """点歌台在线曲库。纯标准库，无第三方依赖。"""
 import html
+import http.client
 import json
+import os
 import re
+import socket
 import ssl
 import time
 import urllib.parse
@@ -20,6 +23,71 @@ _url_cache = {}
 _song_pic = {}
 _cover_cache = {}
 
+# 有些 NAS 拿到了 IPv6 地址与默认路由，但 IPv6 出口实际不通；glibc 默认把
+# AAAA 排在 A 前面，socket.create_connection 会先连 IPv6 并一直等到超时
+# （下面的请求超时是 12s）才回退 IPv4。一个榜单要问 4 个歌单，排队下来
+# 就是 40s+ 的「一直加载中」。这里在连接层只解析 A 记录，不再依赖
+# /etc/gai.conf 这类机器配置；纯 IPv6 环境可设 KTV_IPV4_ONLY=0 关闭。
+IPV4_ONLY = os.environ.get('KTV_IPV4_ONLY', '1') != '0'
+
+
+def _connect(address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
+            source_address=None):
+    """只走 AF_INET 的 create_connection，签名与标准库一致。"""
+    if not IPV4_ONLY:
+        return socket.create_connection(address, timeout, source_address)
+    host, port = address
+    err = None
+    for res in socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM):
+        af, socktype, proto, _, sa = res
+        sock = None
+        try:
+            sock = socket.socket(af, socktype, proto)
+            if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
+                sock.settimeout(timeout)
+            if source_address:
+                sock.bind(source_address)
+            sock.connect(sa)
+            return sock
+        except OSError as e:
+            err = e
+            if sock is not None:
+                sock.close()
+    if err is not None:
+        raise err
+    raise OSError('getaddrinfo returns an empty list')
+
+
+class _V4HTTPConnection(http.client.HTTPConnection):
+    def __init__(self, *args, **kwargs):
+        http.client.HTTPConnection.__init__(self, *args, **kwargs)
+        self._create_connection = _connect
+
+
+class _V4HTTPSConnection(http.client.HTTPSConnection):
+    def __init__(self, *args, **kwargs):
+        http.client.HTTPSConnection.__init__(self, *args, **kwargs)
+        self._create_connection = _connect
+
+
+class _V4HTTPHandler(urllib.request.HTTPHandler):
+    def http_open(self, req):
+        return self.do_open(_V4HTTPConnection, req)
+
+
+class _V4HTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(_V4HTTPSConnection, req, context=self._context)
+
+
+OPENER = urllib.request.build_opener(
+    _V4HTTPHandler(), _V4HTTPSHandler(context=CTX))
+
+
+def urlopen(req, timeout=12):
+    """统一外网请求入口：更新源检查/下载也复用，避免同一类超时。"""
+    return OPENER.open(req, timeout=timeout)
+
 
 def _req(url, method='GET', ref=None, extra=None):
     h = {'User-Agent': UA}
@@ -27,9 +95,8 @@ def _req(url, method='GET', ref=None, extra=None):
         h['Referer'] = ref
     if extra:
         h.update(extra)
-    return urllib.request.urlopen(
-        urllib.request.Request(url, headers=h, method=method),
-        context=CTX, timeout=12)
+    return urlopen(urllib.request.Request(url, headers=h, method=method),
+                   timeout=12)
 
 
 def _json(url):

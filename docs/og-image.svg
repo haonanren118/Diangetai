@@ -18,5 +18,5 @@
   <rect x="88" y="330" width="180" height="7" rx="4" fill="url(#accent)"/>
   <text x="86" y="400" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="30" fill="#9aa5c4">手机扫码点歌 · 电视大屏逐字歌词</text>
   <text x="86" y="450" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="26" fill="#9aa5c4">飞牛 NAS 原生应用 · 不依赖 Docker · MIT 开源</text>
-  <g opacity="0.9"><rect x="86" y="510" width="230" height="62" rx="14" fill="url(#accent)"/><text x="201" y="551" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="25" font-weight="700" fill="#ffffff">v0.0.7 免费下载</text></g>
+  <g opacity="0.9"><rect x="86" y="510" width="230" height="62" rx="14" fill="url(#accent)"/><text x="201" y="551" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Arial, sans-serif" font-size="25" font-weight="700" fill="#ffffff">v0.0.8 免费下载</text></g>
 </svg>

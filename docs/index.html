@@ -33,10 +33,10 @@
       "applicationCategory": "MultimediaApplication",
       "applicationSubCategory": "家庭点歌 / 卡拉OK",
       "operatingSystem": "飞牛 NAS (fnOS)、Linux、Docker",
-      "softwareVersion": "0.0.7",
+      "softwareVersion": "0.0.8",
       "programmingLanguage": "Python",
       "license": "https://github.com/haonanren118/Diangetai/blob/main/LICENSE",
-      "downloadUrl": "https://github.com/haonanren118/Diangetai/releases/tag/v0.0.7",
+      "downloadUrl": "https://github.com/haonanren118/Diangetai/releases/tag/v0.0.8",
       "url": "https://haonanren118.github.io/Diangetai/",
       "codeRepository": "https://github.com/haonanren118/Diangetai",
       "author": { "@type": "Person", "name": "haonanren118", "url": "https://github.com/haonanren118" },
@@ -52,7 +52,8 @@
         { "@type": "Question", "name": "支持本地歌曲、歌词和封面吗？", "acceptedAnswer": { "@type": "Answer", "text": "支持。把 mp3、mp4、flac、wav 等歌曲放进共享目录的 music 文件夹，同名 .lrc 作为歌词，同名 jpg/png 或 cover.jpg 作为封面；也可以在「曲库文件夹」页直接从手机上传。" } },
         { "@type": "Question", "name": "原唱和伴奏怎么切换？", "acceptedAnswer": { "@type": "Answer", "text": "大屏或手机点「切伴奏」即可。曲库里同时放「歌名-原唱」与「歌名-伴奏」时使用真实伴奏音轨；没有配对文件时，大屏用 Web Audio 立体声反相抵消实时生成消人声伴奏。切换不打断播放进度，切歌自动恢复原唱。" } },
         { "@type": "Question", "name": "升级会不会清空已点队列？", "acceptedAnswer": { "@type": "Answer", "text": "不会。关于页上传新版 fpk 可一键热更新，走正规安装链路并同步应用中心版本号，队列、歌曲与封面保留，安装失败自动回滚到备份版本。" } },
-        { "@type": "Question", "name": "开源协议是什么？可以商用吗？", "acceptedAnswer": { "@type": "Answer", "text": "采用 MIT 协议，允许自由使用、修改、再发行与商用，只需保留版权与许可声明。在线曲库使用第三方公开接口，音源版权归各平台所有，项目仅供个人家庭使用。" } }
+        { "@type": "Question", "name": "开源协议是什么？可以商用吗？", "acceptedAnswer": { "@type": "Answer", "text": "采用 MIT 协议，允许自由使用、修改、再发行与商用，只需保留版权与许可声明。在线曲库使用第三方公开接口，音源版权归各平台所有，项目仅供个人家庭使用。" } },
+        { "@type": "Question", "name": "安装后歌源、热歌榜一直在加载中怎么办？", "acceptedAnswer": { "@type": "Answer", "text": "多见于有 IPv6 地址但 IPv6 出口不通的 NAS：系统默认先连 IPv6，等 12 秒超时才回退 IPv4，四个歌单排队就是 40 秒起步。0.0.8 起应用的外网连接默认只解析 IPv4，升级并重启应用即可；也可在系统 /etc/gai.conf 设置 precedence ::ffff:0:0/96 100（模板里注释掉的 10 低于 IPv6 默认的 40，不生效）。用 curl -6 与 curl -4 对比可确认。详见 README 排障章节。" } }
       ]
     }
   ]
@@ -156,7 +157,7 @@ footer{border-top:1px solid var(--line);padding:34px 0 44px;margin-top:40px;colo
 <main id="top">
   <div class="wrap hero">
     <div>
-      <span class="badge">&#9679; v0.0.7 · MIT 开源 · 免费自用</span>
+      <span class="badge">&#9679; v0.0.8 · MIT 开源 · 免费自用</span>
       <h1>把客厅变成<br><span class="grad">点歌台</span></h1>
       <p class="lead">手机扫码点歌，电视大屏逐字歌词。跑在飞牛 NAS 上的原生点歌应用，不依赖 Docker、不需要 root 设备，只用 Python 标准库，装好即用。</p>
       <div class="cta">
@@ -207,7 +208,7 @@ footer{border-top:1px solid var(--line);padding:34px 0 44px;margin-top:40px;colo
       <h2>三步开始唱</h2>
       <p class="sect-lead">飞牛 NAS 用原生安装包，其它主机用独立 Docker 部署包。</p>
       <div class="steps">
-        <article class="step glass"><h3>安装</h3><p>下载 <code>diangetai-0.0.7.fpk</code>，在飞牛「应用中心」手动安装；Docker 主机解压部署包后执行 <code>docker compose up -d --build</code>。</p></article>
+        <article class="step glass"><h3>安装</h3><p>下载 <code>diangetai-0.0.8.fpk</code>，在飞牛「应用中心」手动安装；Docker 主机解压部署包后执行 <code>docker compose up -d --build</code>。</p></article>
         <article class="step glass"><h3>打开大屏</h3><p>电视或平板浏览器访问 <code>http://&lt;NAS_IP&gt;:18090/tv</code>，点一次「开启大屏」允许自动播放。</p></article>
         <article class="step glass"><h3>扫码点歌</h3><p>手机扫右上角二维码，或访问 <code>http://&lt;NAS_IP&gt;:18090/</code>，搜歌后点一下即可加入队列。</p></article>
       </div>
@@ -220,7 +221,7 @@ footer{border-top:1px solid var(--line);padding:34px 0 44px;margin-top:40px;colo
       <div class="glass" style="padding:26px">
         <h2 style="font-size:24px">技术规格</h2>
         <table>
-          <tr><th>当前版本</th><td>0.0.7</td></tr>
+          <tr><th>当前版本</th><td>0.0.8</td></tr>
           <tr><th>运行环境</th><td>飞牛 NAS（fnOS）原生 Python 3.11 / Docker 主机</td></tr>
           <tr><th>依赖</th><td>仅 Python 标准库，无第三方运行依赖</td></tr>
           <tr><th>服务端口</th><td>18090</td></tr>
@@ -254,6 +255,7 @@ footer{border-top:1px solid var(--line);padding:34px 0 44px;margin-top:40px;colo
         <details class="glass"><summary>原唱和伴奏怎么切换？</summary><p>大屏或手机点「切伴奏」即可。曲库里同时放「歌名-原唱」与「歌名-伴奏」时使用真实伴奏音轨；没有配对文件时，大屏用 Web Audio 立体声反相抵消实时生成消人声伴奏。切换不打断播放进度，切歌自动恢复原唱。</p></details>
         <details class="glass"><summary>升级会不会清空已点队列？</summary><p>不会。关于页上传新版 fpk 可一键热更新，走正规安装链路并同步应用中心版本号，队列、歌曲与封面保留，安装失败自动回滚到备份版本。</p></details>
         <details class="glass"><summary>开源协议是什么？可以商用吗？</summary><p>采用 MIT 协议，允许自由使用、修改、再发行与商用，只需保留版权与许可声明。在线曲库使用第三方公开接口，音源版权归各平台所有，项目仅供个人家庭使用。</p></details>
+        <details class="glass"><summary>装好后歌源 / 热歌榜一直在加载中？</summary><p>多见于「有 IPv6 地址、但 IPv6 出口不通」的 NAS：系统默认先连 IPv6，等 12 秒超时才回退 IPv4，一个榜单要问 4 个歌单，排队就是 40 秒起步。<b>0.0.8 起已在应用层强制只解析 IPv4</b>，升级并重启应用即可，不用改系统配置；也可在系统 <code>/etc/gai.conf</code> 写 <code>precedence ::ffff:0:0/96 100</code>（模板里注释掉的 10 低于 IPv6 默认的 40，不生效）。用 <code>curl -6</code> 与 <code>curl -4</code> 对比即可确认，详细排障步骤见 README。</p></details>
       </div>
     </div>
   </section>
@@ -262,12 +264,12 @@ footer{border-top:1px solid var(--line);padding:34px 0 44px;margin-top:40px;colo
     <div class="wrap">
       <div class="download glass">
         <h2>免费下载，立刻开唱</h2>
-        <p class="sect-lead" style="margin-bottom:0">v0.0.7 · 两个安装包 · MIT 开源 · 无需注册</p>
+        <p class="sect-lead" style="margin-bottom:0">v0.0.8 · 两个安装包 · MIT 开源 · 无需注册</p>
         <div class="dl-row">
-          <a class="btn pri" href="https://github.com/haonanren118/Diangetai/releases/download/v0.0.7/diangetai-0.0.7.fpk" rel="noopener">下载飞牛 fpk 安装包</a>
-          <a class="btn" href="https://github.com/haonanren118/Diangetai/releases/download/v0.0.7/diangetai-docker-0.0.7.zip" rel="noopener">下载 Docker 部署包</a>
+          <a class="btn pri" href="https://github.com/haonanren118/Diangetai/releases/download/v0.0.8/diangetai-0.0.8.fpk" rel="noopener">下载飞牛 fpk 安装包</a>
+          <a class="btn" href="https://github.com/haonanren118/Diangetai/releases/download/v0.0.8/diangetai-docker-0.0.8.zip" rel="noopener">下载 Docker 部署包</a>
         </div>
-        <p class="hint">完整更新日志与 SHA256 校验值见 <a href="https://github.com/haonanren118/Diangetai/releases/tag/v0.0.7" rel="noopener" style="color:#cfc7ff">Release 页面</a>。</p>
+        <p class="hint">完整更新日志与 SHA256 校验值见 <a href="https://github.com/haonanren118/Diangetai/releases/tag/v0.0.8" rel="noopener" style="color:#cfc7ff">Release 页面</a>。</p>
       </div>
     </div>
   </section>

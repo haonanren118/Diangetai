@@ -17,6 +17,7 @@ import urllib.parse
 import urllib.request
 
 import multipart
+import music
 
 APPNAME = 'familyktv'
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -271,7 +272,7 @@ def _check(url):
     if not _url_ok(src):
         return {'configured': True, 'hasUpdate': False, 'error': '更新源地址不合法'}
     try:
-        with urllib.request.urlopen(src, timeout=10) as r:
+        with music.urlopen(src, timeout=10) as r:
             d = json.loads(r.read(200000).decode('utf-8', 'replace'))
         latest = str(d.get('version', ''))
         cur = info()['version']
@@ -288,7 +289,7 @@ def _fetch(url):
     if not _url_ok(url):
         raise ValueError('下载地址不合法')
     req = urllib.request.Request(url, headers={'User-Agent': 'diangetai-updater'})
-    with urllib.request.urlopen(req, timeout=60) as r, open(PENDING + '.dl', 'wb') as f:
+    with music.urlopen(req, timeout=60) as r, open(PENDING + '.dl', 'wb') as f:
         left = 200 << 20
         while left > 0:
             b = r.read(65536)
