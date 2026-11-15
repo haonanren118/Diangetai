@@ -34,6 +34,9 @@ h1{margin:0;font-size:19px;letter-spacing:.6px}
 .qbar button.warn{color:#ffb9cb;border-color:rgba(232,81,122,.4)}
 a.folder{display:none;align-items:center;gap:8px;text-decoration:none;padding:11px 13px;margin:0 0 10px;border-radius:10px;border:1px solid rgba(34,201,166,.35);background:rgba(34,201,166,.09);color:var(--accent);font-size:13px;line-height:1.4}
 a.folder b{font-size:16px}
+a.upd{display:none;align-items:center;gap:8px;text-decoration:none;margin:12px 16px 0;padding:11px 13px;border-radius:10px;border:1px solid rgba(255,226,122,.42);background:rgba(255,226,122,.10);color:var(--gold);font-size:13px;line-height:1.4}
+a.upd b{font-size:15px}
+a.upd.show{display:flex}
 .tip{padding:26px 4px;text-align:center;color:var(--sub);font-size:13px;line-height:1.9}
 #bar{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;align-items:center;gap:7px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(9,32,30,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid rgba(34,201,166,.25)}
 #nowt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
@@ -67,6 +70,7 @@ button:focus,input:focus,a:focus{outline:3px solid var(--gold);outline-offset:2p
     <a href="/about" title="关于与在线升级">关于</a>
   </div>
 </header>
+<a class="upd" id="upd" href="/about"><b>&#11088;</b><span id="updTxt"></span></a>
 <div class="tabs">
   <button id="bh" class="on" onclick="setTab('hot')">热歌榜</button>
   <button id="bs" onclick="setTab('search')">搜歌</button>
@@ -198,7 +202,11 @@ document.addEventListener('keydown',function(e){
  if(k==='p'){e.preventDefault();prev();return}
  if(k==='t'){e.preventDefault();switchTrack();return}
 });
-poll();load();setInterval(poll,2000);
+function checkNotice(){get('/api/update/notice',function(x){
+ if(!x)return;var d=null;try{d=JSON.parse(x)}catch(e){}
+ if(d&&d.hasUpdate){el('updTxt').textContent='发现新版本 v'+d.latest+' · 点此升级 →';
+  el('upd').className='upd show'}})}
+poll();load();setInterval(poll,2000);setTimeout(checkNotice,1200);
 </script>
 </body>
 </html>

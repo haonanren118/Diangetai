@@ -1,0 +1,5 @@
+{
+  "version": "0.0.9",
+  "changelog": "检查更新不再报 Python 解析异常；内置官方更新源入口；发现新版本会在点歌台与关于页主动提示",
+  "url": "https://github.com/haonanren118/Diangetai/releases/download/v0.0.9/diangetai-0.0.9.fpk"
+}

@@ -96,6 +96,7 @@ a.inline{color:var(--accent);text-decoration:none}
       <button class="pri" onclick="check()">检查更新</button>
     </div>
     <p class="msg" id="checkMsg">留空时可在下方直接上传新版本 fpk。</p>
+    <p class="tip">不知道填什么？点 <a class="inline" href="javascript:useOfficial()">使用官方更新源</a> 自动填入并检查。更新源必须是返回 <code>{"version":"x.y.z", ...}</code> 的 version.json 直链；仓库页、Releases 网页地址都不行。</p>
   </div>
 
   <div class="card">
@@ -136,18 +137,29 @@ function loadInfo(){js('/api/about',function(d){if(!d)return;
  el('src').value=d.source||'';
  el('btnApply').disabled=!d.fpk;el('btnRollback').disabled=!d.fpk;
  window.__fpk=d.fpk;window.__ver=d.version})}
+var OFFICIAL='https://haonanren118.github.io/Diangetai/version.json';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function saveSource(){var u=el('src').value.trim();
  js('/api/update/source?url='+encodeURIComponent(u),function(d){
-  el('checkMsg').textContent=d&&d.ok?'更新源已保存':'保存失败';el('checkMsg').className='msg'},'POST')}
+  el('checkMsg').textContent=d&&d.ok?('更新源已保存'+(u?'':'（已清除）')):'保存失败';
+  el('checkMsg').className='msg'},'POST')}
+function useOfficial(){el('src').value=OFFICIAL;
+ js('/api/update/source?url='+encodeURIComponent(OFFICIAL),function(d){
+  if(d&&d.ok){check()}else{el('checkMsg').textContent='保存更新源失败';
+   el('checkMsg').className='msg err'}},'POST')}
 function check(){var u=el('src').value.trim();
- el('checkMsg').textContent='正在检查…';
- js('/api/update/check?url='+encodeURIComponent(u),function(d){
-  if(!d){el('checkMsg').textContent='检查失败';return}
-  if(d.error){el('checkMsg').textContent=d.error;el('checkMsg').className='msg err';return}
-  if(!d.configured){el('checkMsg').textContent=d.tip;return}
+ el('checkMsg').textContent='正在检查…';el('checkMsg').className='msg';
+ js('/api/update/check?url='+encodeURIComponent(u)+(u?'':'&clear=1'),function(d){
+  if(!d){el('checkMsg').textContent='检查失败：服务无响应';el('checkMsg').className='msg err';return}
+  if(d.error){el('checkMsg').textContent=d.error;el('checkMsg').className='msg err';
+   if(d.source)el('src').value=d.source;return}
+  if(!d.configured){el('checkMsg').textContent=d.tip;el('checkMsg').className='msg';
+   el('src').value='';return}
+  if(d.source)el('src').value=d.source;
   if(!d.hasUpdate){el('checkMsg').textContent='已是最新版本 v'+d.current+'（远端 v'+d.latest+'）';return}
-  el('checkMsg').innerHTML='发现新版本 <b>v'+d.latest+'</b> '+(d.changelog||'')+
-   (d.url?' <a class="inline" href="javascript:fetchPkg()">下载更新包</a>':'');
+  el('checkMsg').innerHTML='发现新版本 <b>v'+esc(d.latest)+'</b> '+esc(d.changelog)+
+   (d.url?' <a class="inline" href="javascript:fetchPkg()">下载更新包</a>':' · 该更新源未提供下载地址，请在下方上传 fpk');
   el('checkMsg').className='msg ok';window.__fetchUrl=d.url})}
 function fetchPkg(){if(!window.__fetchUrl)return;
  el('state').textContent='正在下载更新包…';
@@ -192,7 +204,13 @@ function poll(){js('/api/update/status',function(d){
   get('/ping',function(x){setTimeout(function(){location.reload()},x==='ok'?1200:2500)});return}
  if(ph==='failed')el('state').className='msg err';
 })}
-loadInfo();poll();
+function autoNotice(){js('/api/update/notice',function(d){
+ var m=el('checkMsg');
+ if(d&&d.hasUpdate&&m.className==='msg'&&m.textContent.indexOf('留空时')===0){
+  m.innerHTML='发现新版本 <b>v'+esc(d.latest)+'</b> · '+
+   '<a class="inline" href="javascript:useOfficial()">使用官方更新源并检查</a>';
+  m.className='msg ok'}})}
+loadInfo();poll();setTimeout(autoNotice,900);
 </script>
 </body>
 </html>

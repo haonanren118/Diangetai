@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tarfile
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -35,6 +36,10 @@ UPDATES = os.path.join(DATA, 'updates')
 BACKUPS = os.path.join(DATA, 'backups')
 STATUS = os.path.join(DATA, 'update_status.json')
 SOURCE = os.path.join(DATA, 'update_source.txt')
+# 未配置更新源时，后台提示用这个官方 version.json；不写进用户配置，不强制联网。
+OFFICIAL_SOURCE = 'https://haonanren118.github.io/Diangetai/version.json'
+NOTICE_TTL = 6 * 3600
+_notice_cache = {}
 PENDING = os.path.join(UPDATES, 'pending.fpk')
 PENDING_META = os.path.join(UPDATES, 'pending.json')
 LOG = os.path.join(DATA, 'update.log')
@@ -262,27 +267,94 @@ def _url_ok(u):
     return bool(re.match(r'^https?://[\x21-\x7e]{1,400}$', u or ''))
 
 
-def _check(url):
-    if url and url != _read(SOURCE).strip():
+def _brief(s, n=90):
+    """把响应/异常摘要压成一行短文本，便于在关于页安全显示。"""
+    s = re.sub(r'\s+', ' ', str(s or '')).strip()
+    return s[:n] + ('…' if len(s) > n else '')
+
+
+def _check(url, clear=False):
+    def fail(msg):
+        return {'configured': True, 'hasUpdate': False,
+                'error': '检查失败：' + msg, 'source': _read(SOURCE).strip()}
+
+    # 输入框清空时显式清除已保存的源：否则「看起来留空」却仍访问旧地址，
+    # 用户会以为检查的是空配置。
+    if clear:
+        _write(SOURCE, '')
+    elif url and url != _read(SOURCE).strip():
         _write(SOURCE, url)
     src = _read(SOURCE).strip()
     if not src:
         return {'configured': False, 'hasUpdate': False,
-                'tip': '未配置更新源，可直接在下方上传 fpk 更新包'}
+                'tip': '未配置更新源；可点「使用官方更新源」自动填入，'
+                       '或直接在下方上传新版本 fpk', 'source': ''}
     if not _url_ok(src):
-        return {'configured': True, 'hasUpdate': False, 'error': '更新源地址不合法'}
+        return fail('更新源地址不合法，需填写 http/https 开头的完整 URL')
+    _notice_cache.pop(src, None)
+    _notice_cache.pop(OFFICIAL_SOURCE, None)
+    d, err = _load_version(src, 10)
+    if err:
+        return fail(err)
+    latest = d['version']
+    cur = info()['version']
+    return {'configured': True, 'hasUpdate': newer(latest, cur),
+            'current': cur, 'latest': latest,
+            'changelog': str(d.get('changelog', '')),
+            'url': str(d.get('url', '')), 'source': src}
+
+
+def _load_version(src, timeout=10):
+    """拉取并校验 version.json，返回 (data, error)；手动检查与后台提示共用。"""
     try:
-        with music.urlopen(src, timeout=10) as r:
-            d = json.loads(r.read(200000).decode('utf-8', 'replace'))
-        latest = str(d.get('version', ''))
-        cur = info()['version']
-        return {'configured': True, 'hasUpdate': newer(latest, cur),
-                'current': cur, 'latest': latest,
-                'changelog': str(d.get('changelog', '')),
-                'url': str(d.get('url', '')), 'source': src}
+        req = urllib.request.Request(src, headers={
+            'User-Agent': 'diangetai-updater',
+            'Accept': 'application/json'})
+        with music.urlopen(req, timeout=timeout) as r:
+            status = getattr(r, 'status', 200) or 200
+            ctype = (r.headers.get('Content-Type') or '').split(';')[0].strip()
+            raw = r.read(200000)
+    except urllib.error.HTTPError as e:
+        return None, '更新源返回 HTTP %s（%s）' % (e.code, _brief(e.reason))
     except Exception as e:
-        return {'configured': True, 'hasUpdate': False, 'error': '检查失败：%s' % e,
-                'source': src}
+        return None, ('无法访问更新源（%s）；请确认地址可访问且返回 version.json'
+                      % _brief(e))
+    if status != 200:
+        return None, '更新源返回 HTTP %s' % status
+    txt = raw.decode('utf-8-sig', 'replace').strip()
+    if not txt:
+        return None, '更新源返回空内容（%s）' % (ctype or '无 Content-Type')
+    if txt[0] not in '{[':
+        return None, '更新源返回的不是 JSON（%s）：%s' % (
+            ctype or '未知类型', _brief(txt))
+    try:
+        d = json.loads(txt)
+    except ValueError:
+        return None, 'version.json 不是合法 JSON：%s' % _brief(txt)
+    if not isinstance(d, dict):
+        return None, 'version.json 顶层必须是对象'
+    latest = str(d.get('version', '')).strip()
+    if not re.match(r'^\d+(?:\.\d+){1,3}$', latest):
+        return None, 'version.json 缺少合法的 version 字段：%s' % _brief(txt)
+    d['version'] = latest
+    return d, None
+
+
+def _notice():
+    """后台版本提示：已配置源优先，否则用官方源；成功缓存 6 小时，失败缓存 5 分钟。"""
+    src = _read(SOURCE).strip() or OFFICIAL_SOURCE
+    hit = _notice_cache.get(src)
+    if hit and time.time() - hit[0] < hit[1]:
+        return hit[2]
+    d, err = _load_version(src, 4)
+    cur = info()['version']
+    res = {'hasUpdate': bool(d and newer(d['version'], cur)),
+           'latest': (d or {}).get('version', ''), 'current': cur,
+           'url': (d or {}).get('url', ''), 'source': src}
+    if err:
+        res['noticeError'] = err
+    _notice_cache[src] = (time.time(), 300 if err else NOTICE_TTL, res)
+    return res
 
 
 def _fetch(url):
@@ -344,7 +416,10 @@ def handle_get(h, path, g):
         h._json(_status())
         return True
     if path == '/api/update/check':
-        h._json(_check(g('url').strip()))
+        h._json(_check(g('url').strip(), g('clear') == '1'))
+        return True
+    if path == '/api/update/notice':
+        h._json(_notice())
         return True
     if path == '/api/update/source':
         h._json({'source': _read(SOURCE).strip()})
